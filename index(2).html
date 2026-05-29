@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>峡谷回声·灵魂共鸣 | 王者女英雄深度测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #0a0418 0%, #1f1635 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(20, 12, 35, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 24px 20px 34px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,200,100,0.4);
+        }
+        .title-area { text-align: center; margin-bottom: 20px; }
+        .title-icon { font-size: 52px; }
+        h1 { font-size: 30px; font-weight: 800; background: linear-gradient(135deg,#FFE6B0,#FFA155); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .sub { color: #c2b0eb; font-size: 14px; margin-top: 6px; }
+        .progress-area { margin: 14px 0 10px; }
+        .progress-bg { background: #2a1b42; border-radius: 30px; height: 8px; }
+        .progress-fill { background: linear-gradient(90deg,#ffbc6e,#ff6a3e); width: 0%; height: 8px; border-radius: 30px; transition: width 0.2s; }
+        .q-counter { text-align: right; font-size: 12px; color: #d6c8ff; margin-top: 6px; }
+        .card { background: rgba(30,20,48,0.85); backdrop-filter: blur(8px); border-radius: 40px; padding: 26px 18px; margin: 20px 0; border: 1px solid rgba(255,180,80,0.5); }
+        .question-text { font-size: 22px; font-weight: 700; color: #FFF5E6; line-height: 1.4; margin-bottom: 30px; text-align: center; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { background: #1e103ad0; border: 1px solid #b77aff; border-radius: 60px; padding: 14px 18px; font-size: 15px; font-weight: 500; color: #f5ecff; text-align: center; cursor: pointer; transition: 0.2s; }
+        .option:hover { background: #3a2960; border-color: #ffc285; transform: scale(0.98); }
+        .nav-buttons { display: flex; justify-content: space-between; gap: 14px; margin-top: 22px; }
+        .nav-btn { background: #3a2960; border: none; border-radius: 60px; padding: 12px 24px; font-size: 15px; font-weight: bold; color: #ffe0b5; cursor: pointer; flex: 1; text-align: center; }
+        .nav-btn.primary { background: linear-gradient(95deg,#ffb347,#ff6f31); color: #221033; }
+        .btn-restart { background: linear-gradient(95deg,#ffb347,#ff6f31); border-radius: 60px; padding: 14px; font-size: 17px; font-weight: bold; color: #221033; width: 100%; margin-top: 20px; cursor: pointer; text-align: center; }
+        .result-card { text-align: center; }
+        .hero-name { font-size: 42px; font-weight: 900; background: linear-gradient(135deg,#FFDEA5,#FFA559); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 12px 0 8px; }
+        .hero-tagline { font-size: 16px; color: #ffcf9a; margin-bottom: 24px; font-style: italic; }
+        .stats-container { background: rgba(0,0,0,0.4); border-radius: 32px; padding: 18px; margin: 18px 0; text-align: left; }
+        .stat-item { margin-bottom: 14px; }
+        .stat-name { font-size: 14px; color: #ddd0ff; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .stat-bar-bg { background: #2a1b42; border-radius: 20px; height: 10px; overflow: hidden; }
+        .stat-bar-fill { background: linear-gradient(90deg,#ffbc6e,#ff6a3e); width: 0%; height: 10px; border-radius: 20px; }
+        .radar-container { margin: 24px 0; text-align: center; background: rgba(0,0,0,0.3); border-radius: 32px; padding: 18px; }
+        canvas { max-width: 100%; height: auto; background: rgba(255,255,255,0.05); border-radius: 20px; margin: 12px auto; display: block; }
+        .info-block { background: rgba(0,0,0,0.3); border-radius: 28px; padding: 16px 18px; margin: 14px 0; text-align: left; }
+        .info-title { font-size: 17px; font-weight: 700; color: #FFDEA5; margin-bottom: 10px; border-left: 4px solid #ffa155; padding-left: 12px; }
+        .info-text { font-size: 15px; line-height: 1.6; color: #f2e6d0; }
+        .long-text { font-size: 15px; line-height: 1.7; color: #f2e6d0; text-align: left; margin-top: 18px; white-space: pre-wrap; }
+        .quote-card { background: #2a1b42a0; border-radius: 28px; padding: 18px; margin: 18px 0; font-style: italic; color: #ffefcf; text-align: center; font-size: 15px; }
+        .ritual-card { background: #1e103a; border-radius: 28px; padding: 18px; margin: 18px 0; text-align: center; font-size: 15px; color: #ffcf9a; border-left: 4px solid #ffbc6e; }
+        .tags { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 18px 0; }
+        .tag { background: #3a2960; padding: 6px 16px; border-radius: 30px; font-size: 13px; color: #ffe0b5; }
+        .tiny-note { font-size: 11px; text-align: center; margin-top: 20px; color: #8f7cb5; }
+        .result-pager { display: flex; justify-content: space-between; margin: 18px 0; gap: 14px; }
+        .pager-btn { background: #3a2960; border-radius: 40px; padding: 10px 20px; font-size: 14px; color: #ffe0b5; cursor: pointer; flex: 1; text-align: center; }
+        @media (max-width: 480px) {
+            .container { padding: 20px 16px 30px; }
+            .question-text { font-size: 20px; }
+            .hero-name { font-size: 32px; }
+            .info-text, .long-text { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="title-area">
+        <div class="title-icon">🌙🔮</div>
+        <h1>峡谷回声·灵魂共鸣</h1>
+        <div class="sub">40位女英雄·谁是另一个你？</div>
+    </div>
+    <div id="dynamicContent"></div>
+    <div class="tiny-note">✨ 本测试仅供娱乐，结果仅供参考 ✨</div>
+</div>
+
+<script>
+// ======================== 辅助函数 ========================
+function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+const rituals = [
+    "宜：主动出击，别等人来。忌：犹豫不决。",
+    "宜：给自己买杯奶茶。忌：熬夜。",
+    "宜：尝试新事物。忌：纠结过去。",
+    "宜：和朋友开黑。忌：单排连跪。",
+    "宜：大胆表达想法。忌：憋着不说。",
+    "宜：放自己半天假。忌：硬撑。",
+    "宜：整理房间。忌：拖延。",
+    "宜：夸夸自己。忌：自我否定。",
+    "宜：出门散步。忌：刷手机刷到半夜。",
+    "宜：吃顿好的。忌：节食。"
+];
+function getRitual() { return randomItem(rituals); }
+
+const DIMENSIONS = ["好胜锋芒", "情绪稳定", "共情温柔", "理智清醒", "叛逆自由", "隐忍城府", "浪漫感性", "责任担当"];
+
+// ======================== 30道题目 ========================
+const QUESTIONS = [
+    { text:"你更喜欢哪种放松方式？", options:["看书听音乐","聚会聊天","运动冒险","玩游戏"], scores:[{"浪漫感性":10,"情绪稳定":5,"共情温柔":5},{"共情温柔":10,"叛逆自由":-5,"浪漫感性":5},{"好胜锋芒":10,"叛逆自由":10,"责任担当":5},{"好胜锋芒":5,"叛逆自由":5}] },
+    { text:"队友一楼秒选猴子，发出“这把我拿吉吉国王乱杀”。BP时你最想说？", options:["选瑶妹，跟随吉吉国王出征","选硬控，帮你稳一手","默默掏出战力英雄","打字：扣1送地狱火"], scores:[{"好胜锋芒":-5,"责任担当":-10,"共情温柔":10},{"理智清醒":10,"责任担当":15,"情绪稳定":5},{"好胜锋芒":20,"叛逆自由":-10,"责任担当":5},{"浪漫感性":10,"叛逆自由":10,"情绪稳定":5}] },
+    { text:"你觉得自己最像哪种动物？", options:["猫（独立）","狗（忠诚）","狐狸（聪明）","鹿（温柔）"], scores:[{"叛逆自由":15,"隐忍城府":5,"共情温柔":-5},{"责任担当":10,"共情温柔":10,"情绪稳定":5},{"理智清醒":15,"隐忍城府":10,"好胜锋芒":5},{"共情温柔":15,"浪漫感性":10,"情绪稳定":5}] },
+    { text:"你对爱情的态度是？", options:["宁缺毋滥","随缘相遇","主动争取","害怕受伤"], scores:[{"好胜锋芒":5,"理智清醒":10,"责任担当":5},{"浪漫感性":10,"情绪稳定":5},{"好胜锋芒":15,"叛逆自由":5,"浪漫感性":10},{"隐忍城府":15,"情绪稳定":-10,"共情温柔":-5}] },
+    { text:"朋友遇到困难会找你吗？", options:["经常，我很可靠","偶尔，我会帮忙","很少，我不善于安慰","不会，他们觉得我冷"], scores:[{"责任担当":20,"共情温柔":15,"情绪稳定":10},{"责任担当":5,"共情温柔":10},{"共情温柔":-10,"责任担当":-5,"隐忍城府":5},{"共情温柔":-20,"责任担当":-15,"隐忍城府":10}] },
+    { text:"连跪几把，你感觉全世界都在针对你。你打开语音，会说什么？", options:["悲愤长啸：“王者荣耀，你坏事做尽！”","冷静复盘：“这系统安排的队友不行”","玄学改命：“不打了，我去拜拜”","接受现实：“我就是个菜鸡”"], scores:[{"情绪稳定":-15,"好胜锋芒":5,"浪漫感性":10},{"理智清醒":15,"情绪稳定":5,"责任担当":-5},{"情绪稳定":-20,"浪漫感性":5,"叛逆自由":5},{"情绪稳定":-25,"责任担当":-10,"好胜锋芒":-10}] },
+    { text:"你最喜欢的颜色是？", options:["红色","蓝色","紫色","粉色"], scores:[{"好胜锋芒":15,"浪漫感性":5},{"理智清醒":10,"情绪稳定":5},{"浪漫感性":15,"隐忍城府":10},{"共情温柔":10,"浪漫感性":15}] },
+    { text:"面对压力，你通常？", options:["独自消化","找人倾诉","用工作麻痹","去运动发泄"], scores:[{"隐忍城府":15,"情绪稳定":5},{"共情温柔":15,"情绪稳定":10},{"责任担当":15,"好胜锋芒":5,"情绪稳定":-5},{"好胜锋芒":10,"叛逆自由":10,"情绪稳定":10}] },
+    { text:"你路过宿舍走廊，撞见杨玉环（“李华”）和司马懿两人，正鬼鬼祟祟地把一件新皮肤塞进背包。李华念叨着：“这件借我穿穿，下辈子还你……”司马懿在一旁望风，小声说：“快点，有人来了。” 这时你会？", options:["大声喊：“抓贼啊！！李华和司马懿偷皮肤了！”","悄悄凑过去，塞给她们一本贤者之书，捂住眼睛：“能不能帮我家xx也搞一件？我啥也没看见！”","立刻掏出手机，拨打峡谷热线，义正言辞：“您好！有人偷皮肤！对了，狄大人，关于我家xx加强这件事……”","假装没看见，默默披上魔女斗篷，转身离开"], scores:[{"责任担当":15,"好胜锋芒":10,"理智清醒":5},{"叛逆自由":15,"隐忍城府":10,"共情温柔":-5},{"理智清醒":15,"责任担当":10,"好胜锋芒":5},{"隐忍城府":20,"责任担当":-15,"情绪稳定":5}] },
+    { text:"你更擅长？", options:["理性分析","感性共情","创意想象","执行落实"], scores:[{"理智清醒":20,"好胜锋芒":5},{"共情温柔":20,"浪漫感性":10},{"叛逆自由":15,"浪漫感性":15},{"责任担当":20,"好胜锋芒":10}] },
+    { text:"你希望别人怎么评价你？", options:["可靠","有趣","温柔","厉害"], scores:[{"责任担当":20,"情绪稳定":10},{"叛逆自由":15,"浪漫感性":15},{"共情温柔":20,"情绪稳定":10},{"好胜锋芒":20,"责任担当":10}] },
+    { text:"你讨厌哪种人？", options:["虚伪","自私","懦弱","无聊"], scores:[{"理智清醒":10,"隐忍城府":5,"好胜锋芒":-5},{"共情温柔":-15,"责任担当":-5},{"好胜锋芒":-15,"责任担当":-10},{"浪漫感性":-10,"叛逆自由":5}] },
+    { text:"你的理想伴侣应该？", options:["懂你","宠你","带你成长","陪你疯"], scores:[{"共情温柔":15,"理智清醒":10},{"浪漫感性":15,"共情温柔":10},{"好胜锋芒":15,"责任担当":10},{"叛逆自由":20,"浪漫感性":15}] },
+    { text:"你更喜欢哪种天气？", options:["晴天","雨天","雪天","阴天"], scores:[{"好胜锋芒":10,"叛逆自由":5},{"浪漫感性":15,"共情温柔":10},{"隐忍城府":10,"情绪稳定":5},{"情绪稳定":5,"理智清醒":5}] },
+    { text:"你觉得自己最大的优点是？", options:["坚强","善良","聪明","乐观"], scores:[{"好胜锋芒":15,"责任担当":15,"情绪稳定":10},{"共情温柔":20,"浪漫感性":10},{"理智清醒":20,"隐忍城府":10},{"情绪稳定":15,"叛逆自由":10}] },
+    { text:"你最大的缺点呢？", options:["太敏感","太固执","太懒散","太冷漠"], scores:[{"情绪稳定":-15,"共情温柔":-5},{"好胜锋芒":-5,"理智清醒":-10},{"责任担当":-15,"好胜锋芒":-10},{"共情温柔":-20,"浪漫感性":-15}] },
+    { text:"你更喜欢哪种旅行？", options:["城市游","海边","山区","古镇"], scores:[{"好胜锋芒":5,"叛逆自由":5},{"浪漫感性":15,"共情温柔":10},{"隐忍城府":5,"情绪稳定":10},{"浪漫感性":10,"理智清醒":5}] },
+    { text:"你的社交圈？", options:["很广，朋友多","几个知心好友","喜欢独处","随缘"], scores:[{"共情温柔":10,"叛逆自由":5},{"共情温柔":15,"隐忍城府":5},{"隐忍城府":15,"情绪稳定":10},{"浪漫感性":5,"情绪稳定":5}] },
+    { text:"你相信星座吗？", options:["信","半信半疑","不信","当娱乐"], scores:[{"浪漫感性":15,"共情温柔":5},{"理智清醒":5,"情绪稳定":5},{"理智清醒":15,"好胜锋芒":5},{"叛逆自由":10,"浪漫感性":10}] },
+    { text:"你更喜欢哪种宠物？", options:["猫","狗","兔子","鸟"], scores:[{"叛逆自由":15,"隐忍城府":5},{"共情温柔":15,"责任担当":10},{"共情温柔":10,"浪漫感性":10},{"叛逆自由":10,"浪漫感性":10}] },
+    { text:"孙策带着孙尚香把隔壁关羽的摩托车拆了当废铁卖，打算拿卖的钱买新出的520情皮。他们找到管钱的你——孙权！孙尚香拎着大炮撒娇，孙策搭着你肩膀喊好兄弟，刘备正带着关羽张飞在校门口堵人。你会？", options:["扣下妹妹零花钱和大哥大炮，先把关羽的摩托车买回来","拿出私房钱塞给妹妹，让她买皮肤，自己去跟父亲说","拉着自家车队去校门口迎战，要钱没有要架奉陪","拍下两人ID发给刘备，让他自己处理，附言“家规难管”"], scores:[{"责任担当":20,"理智清醒":15,"情绪稳定":10},{"共情温柔":15,"叛逆自由":-5,"责任担当":-5},{"好胜锋芒":25,"叛逆自由":20,"责任担当":10},{"理智清醒":20,"隐忍城府":15,"好胜锋芒":-5}] },
+    { text:"你购物更看重？", options:["品牌","实用","颜值","性价比"], scores:[{"好胜锋芒":10,"浪漫感性":5},{"理智清醒":15,"责任担当":5},{"浪漫感性":20,"好胜锋芒":5},{"理智清醒":10,"隐忍城府":5}] },
+    { text:"你更喜欢哪种音乐？", options:["流行","古典","摇滚","民谣"], scores:[{"浪漫感性":10,"共情温柔":5},{"理智清醒":15,"隐忍城府":10},{"叛逆自由":20,"好胜锋芒":10},{"共情温柔":15,"浪漫感性":15}] },
+    { text:"你的生活节奏？", options:["快","慢","有规律","随性"], scores:[{"好胜锋芒":15,"责任担当":10},{"情绪稳定":10,"共情温柔":5},{"理智清醒":15,"责任担当":10},{"叛逆自由":20,"浪漫感性":10}] },
+    { text:"你更愿意把钱花在？", options:["旅行","美食","衣服","学习"], scores:[{"叛逆自由":15,"浪漫感性":15},{"共情温柔":10,"浪漫感性":10},{"好胜锋芒":10,"浪漫感性":10},{"理智清醒":15,"责任担当":15}] },
+    { text:"你觉得自己是？", options:["理性派","感性派","直觉派","行动派"], scores:[{"理智清醒":20,"好胜锋芒":5},{"共情温柔":20,"浪漫感性":15},{"浪漫感性":15,"隐忍城府":5},{"好胜锋芒":20,"责任担当":15}] },
+    { text:"你更害怕？", options:["孤独","失败","被欺骗","平庸"], scores:[{"共情温柔":-15,"情绪稳定":-10},{"好胜锋芒":-15,"责任担当":-10},{"理智清醒":-10,"隐忍城府":-5},{"浪漫感性":-10,"叛逆自由":-5}] },
+    { text:"你的口头禅可能是什么？", options:["没事","随便","哈哈哈","真的假的"], scores:[{"情绪稳定":10,"隐忍城府":5},{"叛逆自由":5,"责任担当":-5},{"浪漫感性":15,"共情温柔":10},{"理智清醒":5,"隐忍城府":5}] },
+    { text:"你最后想对自己说什么？", options:["辛苦了","加油","没关系","做自己"], scores:[{"共情温柔":15,"情绪稳定":10},{"好胜锋芒":15,"责任担当":10},{"共情温柔":10,"情绪稳定":15},{"叛逆自由":20,"浪漫感性":15}] },
+    { text:"深夜，云梦泽女生宿舍。你和瑶、小缘窝在被窝里，翻看少司缘珍藏的“峡谷男神绝密相册”。你翻到一页，惊呼：“哇，这是大司命吗？他不戴面具原来长这样啊！”少司缘得意地压低声音：“嘘——这可是我花了一整局攒的被动，从李元芳那儿换来的！绝密资料！绝不外传！”瑶突然僵住，指着窗外：“那个……你们看窗外是谁……”你俩转头，发现没关紧的宿舍门缝外，影不知何时站在那里，手里还拿着半个西瓜，一脸坏笑地看着你们。空气瞬间凝固。你会？", options:["一把将相册塞进瑶怀里，指着少司缘大喊：“是她逼我们看的！我们是被迫的！”","强装镇定，转移话题：“影姐，你觉不觉得今晚月色真美…哈哈？哦对了，西瓜哪买的？”","悄悄点开通讯器，给东皇太一发消息：“东神大人，紧急情况！大司命的秘密要泄露了！您快管管！”","假装无事发生的继续刚才的话题：“那个……下期能不能做个鬼谷子的专题？我一直很好奇他面具下面长什么样。”"], scores:[{"隐忍城府":-10,"责任担当":-15,"共情温柔":-10},{"情绪稳定":15,"浪漫感性":10,"叛逆自由":5},{"理智清醒":15,"隐忍城府":10,"责任担当":5},{"叛逆自由":15,"浪漫感性":15,"共情温柔":5}] }
+];
+for(let i=0;i<QUESTIONS.length;i++) while(QUESTIONS[i].scores.length < QUESTIONS[i].options.length) QUESTIONS[i].scores.push({});
+
+function computeRadarScores(selections) {
+    let scores = Object.fromEntries(DIMENSIONS.map(d=>[d,50]));
+    for(let i=0;i<selections.length;i++) {
+        let opt = selections[i];
+        if(opt!==null && QUESTIONS[i].scores[opt]) {
+            let delta = QUESTIONS[i].scores[opt];
+            for(let d of DIMENSIONS) if(delta[d]) scores[d] += delta[d];
+        }
+    }
+    for(let d of DIMENSIONS) scores[d] = Math.min(100, Math.max(0, scores[d]));
+    return scores;
+}
+
+function drawRadar(ctx,w,h,scores){
+    const cx=w/2,cy=h/2, r=Math.min(w,h)*0.35;
+    const angles = DIMENSIONS.map((_,i)=> -Math.PI/2 + i*2*Math.PI/DIMENSIONS.length);
+    const vals = DIMENSIONS.map(d=>scores[d]/100);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle="#b77aff";
+    ctx.fillStyle="rgba(255,200,100,0.2)";
+    ctx.beginPath();
+    for(let i=0;i<vals.length;i++){
+        let x=cx+r*vals[i]*Math.cos(angles[i]), y=cy+r*vals[i]*Math.sin(angles[i]);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle="#ffcf9a";
+    for(let i=0;i<angles.length;i++){
+        let x=cx+r*Math.cos(angles[i]), y=cy+r*Math.sin(angles[i]);
+        ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
+        let tx=cx+(r+20)*Math.cos(angles[i]), ty=cy+(r+20)*Math.sin(angles[i]);
+        ctx.fillStyle="#ddd0ff"; ctx.font="12px system-ui";
+        ctx.fillText(DIMENSIONS[i], tx-18, ty-6);
+    }
+    ctx.beginPath(); ctx.arc(cx,cy,5,0,2*Math.PI); ctx.fillStyle="#ffa155"; ctx.fill();
+}
+
+const radarPhrases = {
+    "好胜锋芒高": ["你的胜负欲极强，不甘落后，总想成为焦点。", "你骨子里燃烧着竞争的火焰，做什么都想争第一。", "你从不掩饰自己的好胜心，赢就是你唯一的执念。"],
+    "好胜锋芒中": ["你有适度的好胜心，懂得在竞争中保持平和。", "你想赢，但也不怕输，心态放得很平。", "你的好胜心恰到好处，不会给你带来过多压力。"],
+    "好胜锋芒低": ["你对输赢看得很淡，更享受过程而非结果。", "你不在乎排名，只在乎自己是否开心。", "输赢对你来说没那么重要，轻松上阵才是你的风格。"],
+    "情绪稳定高": ["你情绪极其稳定，逆风也能沉着应对，是团队中的定心丸。", "很少有人能让你情绪失控，你总是冷静得可怕。", "无论顺逆，你都能稳住心态，这是很多人不具备的能力。"],
+    "情绪稳定中": ["你多数时候能保持冷静，偶尔也会炸毛，但很快能恢复。", "你的情绪起伏不大，遇到事情能理性思考。", "你懂得调节情绪，不会让负面情绪影响太久。"],
+    "情绪稳定低": ["你容易情绪波动，连败后需要深呼吸，避免上头。", "你的心情容易被外界影响，有时会因此内耗。", "情绪是你需要修炼的课题，学会放松对你有很大帮助。"],
+    "共情温柔高": ["你非常温柔，善于倾听，朋友都愿意向你倾诉心事。", "你的共情力极强，总能察觉别人的情绪变化。", "你有一颗柔软的心，对待世界总是充满善意。"],
+    "共情温柔中": ["你能体谅他人，但也会保持适当的距离。", "你有同理心，但不会过度卷入他人的情绪。", "你懂得照顾别人的感受，同时也保护自己的边界。"],
+    "共情温柔低": ["你更关注自身，不太容易被他人的情绪影响。", "你理性优先，很少感情用事，有时显得有点冷漠。", "你不是不近人情，只是更喜欢用逻辑解决问题。"],
+    "理智清醒高": ["你理性至上，做决定前深思熟虑，极少冲动。", "你习惯用数据分析问题，很少感情用事。", "你的头脑清醒，不会被他人的意见轻易左右。"],
+    "理智清醒中": ["你在理性和感性之间有着不错的平衡。", "你既能理性分析，又能照顾情绪，很难得。", "你的判断通常基于事实，但也会听从内心。"],
+    "理智清醒低": ["你凭直觉生活，喜欢随心而动，不喜欢被逻辑束缚。", "你更相信第一感觉，有时候冲动是魔鬼。", "你的决定常常出人意料，但那就是你的风格。"],
+    "叛逆自由高": ["你讨厌被规则束缚，喜欢打破常规，活得特立独行。", "你天生反骨，不喜欢别人告诉你该怎么做。", "自由对你来说比什么都重要，你不愿意被任何框架限制。"],
+    "叛逆自由中": ["你有时会想突破常规，但多数时候还是循规蹈矩。", "你内心向往自由，但也会考虑现实因素。", "你偶尔会做一些出格的事，但不会太过分。"],
+    "叛逆自由低": ["你习惯遵守规则，喜欢安稳有序的生活。", "你尊重权威，不喜欢折腾，随遇而安。", "稳定对你来说很重要，你不喜欢意外的变化。"],
+    "隐忍城府高": ["你心思深沉，不轻易表露真实想法，擅长隐藏情绪。", "你像一本合上的书，没人知道你在想什么。", "你懂得韬光养晦，不会轻易暴露自己的底牌。"],
+    "隐忍城府中": ["你懂得适当保留，但也会在信任的人面前敞开心扉。", "你不是没心眼，只是不愿意用。", "你该忍的时候忍，该说的时候说，分寸感很好。"],
+    "隐忍城府低": ["你心直口快，藏不住事，喜怒都写在脸上。", "你坦诚率真，不喜欢玩心机，有什么说什么。", "你活得透明，喜欢和讨厌都写在脸上。"],
+    "浪漫感性高": ["你骨子里充满浪漫细胞，追求仪式感和诗意的生活。", "你相信爱情，相信童话，相信世界上有奇迹。", "你的生活需要美和爱，否则会觉得枯燥。"],
+    "浪漫感性中": ["你偶尔会被美好的事物打动，但不会沉迷。", "你务实但也会偶尔小浪漫，恰到好处。", "你能欣赏美，但不会脱离现实。"],
+    "浪漫感性低": ["你务实理性，对风花雪月不太感冒。", "你更看重实际的东西，浪漫对你来说可有可无。", "你不会为虚无缥缈的东西浪费时间，脚踏实地才是真。"],
+    "责任担当高": ["你非常有责任感，遇事从不推脱，是可靠的后盾。", "你扛得住事，别人不敢接的任务你敢接。", "你的责任感让你在团队中成为不可或缺的人。"],
+    "责任担当中": ["你会承担该负的责任，但也不愿过度勉强自己。", "你分得清哪些是你该做的，哪些可以拒绝。", "你靠谱但不会让自己太累。"],
+    "责任担当低": ["你比较随性，不喜欢扛责任，更愿意轻松生活。", "你不喜欢压力，遇到麻烦事第一反应是躲开。", "你更注重当下的快乐，不想被责任束缚。"]
+};
+function getRadarSentence(dimension, level) { const key = dimension + level; const arr = radarPhrases[key] || [radarPhrases[dimension+"中"][0]]; return randomItem(arr); }
+function radarAnalysis(scores) { const level = (val) => { if (val > 70) return "高"; if (val < 40) return "低"; return "中"; }; const lines = [ getRadarSentence("好胜锋芒", level(scores["好胜锋芒"])), getRadarSentence("情绪稳定", level(scores["情绪稳定"])), getRadarSentence("共情温柔", level(scores["共情温柔"])), getRadarSentence("理智清醒", level(scores["理智清醒"])), getRadarSentence("叛逆自由", level(scores["叛逆自由"])), getRadarSentence("隐忍城府", level(scores["隐忍城府"])), getRadarSentence("浪漫感性", level(scores["浪漫感性"])), getRadarSentence("责任担当", level(scores["责任担当"])) ]; const endings = [ "这种性格组合让你在人群中显得独特——你既有内心的锋芒，又有温柔的底色。", "你的性格像一片复杂的拼图，每一块都藏着不同的故事。", "你很难被简单定义，因为你的身上同时存在着矛盾又和谐的特质。" ]; return "根据你的回答，我们绘制了你的八维人格图。\n\n" + lines.join(" ") + "\n\n" + randomItem(endings); }
+
+// ======================== 修复后的性格分析模块（增加了更多随机选项） ========================
+function getPersonalityAnalysis(scores) {
+    const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    // 性格底色（10种变体）
+    let base = "";
+    if (scores["浪漫感性"] > 70) {
+        base = r([
+            "你是一个骨子里充满浪漫与幻想的人。你喜欢晚风、月光和一切有诗意的事物。你温柔但不软弱，内心有自己坚持的秩序。",
+            "你的内心住着一位诗人，总能在平凡日常里发现闪光点。你相信世间存在童话般的相遇，也愿意为此等待。",
+            "你感性且细腻，容易被艺术和情感打动。你不喜欢粗糙的世界，总是试图在平凡中创造浪漫。",
+            "你像一缕春风，温柔地拂过每个人的心。你相信爱能治愈一切，也愿意成为那个治愈者。",
+            "你的世界里有星河、有花瓣、有所有美好的意象。你不愿被现实完全驯服，始终保留着少女般的憧憬。"
+        ]);
+    } else if (scores["叛逆自由"] > 70) {
+        base = r([
+            "你特立独行，讨厌被定义。你像一阵自由的风，不喜欢条条框框。你追求新鲜感，讨厌重复和无聊。",
+            "你天生反骨，不轻易顺从规则。你只遵循自己内心的秩序，活得洒脱而真实。",
+            "你拒绝被世俗标准捆绑，喜欢走自己的路。哪怕不被理解，也要活成自己想要的模样。",
+            "你身上有一种野性的魅力，不按常理出牌。你相信人生没有标准答案，自己的选择就是最好的。",
+            "你讨厌被束缚，无论是感情还是生活。你需要足够的空间呼吸，也尊重别人的独立。"
+        ]);
+    } else if (scores["理智清醒"] > 70) {
+        base = r([
+            "你理性、冷静，习惯用逻辑解决问题。你不轻易被情绪左右，做事有条理，善于规划。",
+            "你的头脑清晰，很少冲动。你相信数据分析比直觉更可靠，是朋友眼中的“军师”型人物。",
+            "你务实且目标明确，不会被甜言蜜语迷惑。你更看重实际行动，而非空洞承诺。",
+            "你习惯先观察再行动，谋定而后动。你很少后悔，因为每一个决定都经过深思熟虑。",
+            "你不喜欢模糊不清的状态，凡事都要有依据。你的冷静让你在混乱中也能保持方向。"
+        ]);
+    } else {
+        base = r([
+            "你温柔与倔强并存。你习惯把情绪藏在心底，不愿让别人看到你的脆弱。你像一只刺猬，柔软的内核被尖锐的外壳包裹着。",
+            "你外表随和，内心却有自己的坚持。你不喜欢冲突，但也不会无底线妥协。",
+            "你是一个矛盾的结合体：既渴望被理解，又害怕太过亲密。你在热闹与孤独之间自如切换。",
+            "你表面上看起来什么都不在乎，其实你比谁都在意。只是你习惯了把情绪调成静音模式。",
+            "你身上有一种沉静的力量，不张扬但坚定。你不喜欢解释，相信懂你的人自然懂。"
+        ]);
+    }
+    if (scores["情绪稳定"] < 40) base += " 你的情绪偶尔会像过山车，但这也是你真实可爱的一面。";
+    else if (scores["共情温柔"] > 75) base += " 你总是能敏锐地察觉到别人的情绪，所以朋友们都喜欢找你倾诉。";
+    else if (scores["好胜锋芒"] > 75) base += " 你的好胜心让你不断向前，但有时也要学会放过自己。";
+
+    // 爱情观（10种变体）
+    let love = "";
+    if (scores["共情温柔"] > 70) {
+        love = r([
+            "你在爱情里极度温柔，愿意为对方付出一切。你善于倾听，能够体谅对方的情绪。但有时候你会因为太在乎而失去自我，记得先爱自己。",
+            "你恋爱时会全身心投入，恨不得把心掏出来给对方看。但也因此容易受伤，学会保护自己是你的必修课。",
+            "你相信真心能换真心，所以从不吝啬付出。但你也要明白，不是所有人都值得你的好。",
+            "你愿意为了爱情妥协，但不会没有底线。你希望对方也能同样珍惜你的付出。",
+            "你在爱里像一团温火，不炽烈但持久。你不需要轰轰烈烈，只想要细水长流的陪伴。"
+        ]);
+    } else if (scores["好胜锋芒"] > 70) {
+        love = r([
+            "你敢爱敢恨，主动争取，从不拖泥带水。你希望对方能跟上你的节奏，和你一起并肩作战。",
+            "你的爱情像一场冒险，需要足够的激情和信任。你不喜欢拖沓，也不喜欢被辜负。",
+            "你欣赏强者，也渴望成为强者。在感情里，你希望双方都能互相成就，而不是单方面依赖。",
+            "你讨厌暧昧和纠缠，喜欢就是喜欢，不喜欢就果断离开。你不想浪费彼此的时间。",
+            "你需要一个能和你一起成长的人，而不是只会说甜言蜜语。你相信最好的爱情是势均力敌。"
+        ]);
+    } else if (scores["理智清醒"] > 70) {
+        love = r([
+            "你对待感情谨慎而理性，不会轻易开始。你希望对方能通过你的层层考验，证明自己的真心。",
+            "你不相信一见钟情，更看重长期相处的默契。你的爱情需要时间来酝酿。",
+            "你很少被外表或甜言蜜语打动，更在意对方的三观是否与你契合。",
+            "你会把感情也列入人生规划，不希望它打乱你的节奏。你需要的是锦上添花，而不是雪中送炭。",
+            "你欣赏聪明、有思想的人，精神上的共鸣比什么都重要。你希望对方能和你一起探讨世界。"
+        ]);
+    } else {
+        love = r([
+            "你在感情里宁缺毋滥，不轻易开始，但一旦认定就会很认真。你容易受伤，但从不表现出来。",
+            "你渴望被坚定地选择，却又害怕太过亲密。你总是默默付出，希望对方能读懂你的眼神。",
+            "你相信缘分，但不强求。该来的总会来，在那之前你会好好经营自己的生活。",
+            "你期待一段纯粹的关系，没有算计和试探。你不喜欢复杂，只想简简单单地去爱。",
+            "你心里有一个角落，一直住着一个关于爱情的梦。你还在等那个能让你安心的人出现。"
+        ]);
+    }
+    if (scores["隐忍城府"] > 70) love += " 你不喜欢把情绪挂在脸上，即使心里翻江倒海，表面依然云淡风轻。";
+    else if (scores["叛逆自由"] > 70) love += " 你讨厌被束缚，所以也希望对方给你足够的空间。爱情不是占有，而是并肩看世界。";
+
+    // 事业人际（10种变体）
+    let career = "";
+    if (scores["责任担当"] > 70) {
+        career = r([
+            "你非常有责任感，做事靠谱，是团队中值得信赖的人。你抗压能力强，遇到问题不会逃避。",
+            "你天生就是团队里的主心骨，有你在大家就安心。你不怕麻烦，愿意多做一些。",
+            "你的口碑很好，因为你答应的事一定会做到。朋友都愿意把重要的事情托付给你。",
+            "你习惯把事情安排得井井有条，讨厌拖延和敷衍。你的执行力是你的核心竞争力。",
+            "你对待工作像对待生活一样认真，不轻易承诺，但一旦承诺就会全力以赴。"
+        ]);
+    } else if (scores["叛逆自由"] > 70) {
+        career = r([
+            "你喜欢挑战常规，不按套路出牌。你适合需要创意和灵活性的工作，朝九晚五可能会让你窒息。",
+            "你不喜欢坐班式的枯燥工作，更喜欢自由职业或创意岗位。你的圈子不大但质量很高。",
+            "你拒绝无聊，无论是工作还是社交，都需要新鲜感。你总是能带来意想不到的惊喜。",
+            "你的灵感总是在不经意间迸发，你不适合被严格的框架束缚。你需要自由度来发挥才华。",
+            "你讨厌办公室政治，宁愿少赚一点也要活得开心。你相信工作是为了生活，而不是反过来。"
+        ]);
+    } else {
+        career = r([
+            "你做事认真，讲究条理，喜欢把事情安排得井井有条。你擅长倾听，朋友喜欢找你倾诉心事。",
+            "你是很好的协作者，能平衡各方需求。你不会主动争功，但也希望自己的付出被看见。",
+            "你在团队中可能不是最耀眼的，但绝对是最稳的。你的可靠让所有人都放心。",
+            "你善于在复杂的人际关系中找到平衡点，不站队也不得罪人。你有你的处世智慧。",
+            "你不喜欢争抢，但也不喜欢被忽视。你相信是金子总会发光，所以一直默默努力。"
+        ]);
+    }
+    if (scores["情绪稳定"] < 40) career += " 你偶尔会因压力而焦虑，学会放松和寻求帮助会让你走得更远。";
+    else if (scores["理智清醒"] > 70) career += " 你的分析能力很强，适合从事需要逻辑和策略的工作。";
+
+    return [`【你的性格底色】\n${base}`, `【爱情中的你】\n${love}`, `【事业与人际】\n${career}`];
+}
+
+function generateDynamicAdvice(selections, scores) {
+    const teamFight = selections[20];
+    const heroPref = selections[21];
+    const tilt = selections[5];
+    const monkey = selections[1];
+    const isAggressive = scores["好胜锋芒"] > 65;
+    const isCreative = scores["叛逆自由"] > 65;
+    const isCalm = scores["情绪稳定"] > 65;
+    const habitPool = [];
+    if (teamFight === 3) habitPool.push("你总是第一个冲进战场，享受先手开团的快感，但也容易与队友脱节。");
+    if (teamFight === 1) habitPool.push("你喜欢绕后切C，耐心等待机会，一击必杀。");
+    if (teamFight === 2) habitPool.push("你习惯在边缘消耗，不轻易涉险，但有时会错失收割时机。");
+    if (teamFight === 0) habitPool.push("你等队友先上，自己再跟输出，打法比较稳健。");
+    if (heroPref === 0) habitPool.push("你偏爱位移多的英雄，操作越复杂你越兴奋。");
+    if (heroPref === 1) habitPool.push("你喜欢高爆发的英雄，一套连招带走对手的感觉让你上瘾。");
+    if (heroPref === 2) habitPool.push("你选择手长的英雄，在安全距离输出，不太愿意冒险。");
+    if (heroPref === 3) habitPool.push("你喜欢能抗能打的战士，正面硬刚从不退缩。");
+    if (isAggressive) habitPool.push("你的进攻欲望极强，经常主动找机会打架。");
+    if (isCreative) habitPool.push("你偶尔会掏出非主流出装或打法，让对手摸不着头脑。");
+    if (habitPool.length === 0) habitPool.push("你打法灵活，能根据局势调整自己的节奏。");
+    let gameplay = "你的战斗习惯： " + randomItem(habitPool);
+    if (habitPool.length > 1 && Math.random() > 0.5) gameplay += " " + randomItem(habitPool.filter(h => h !== gameplay.split("：")[1]));
+    const cautionPool = [];
+    if (tilt === 0) cautionPool.push("连败后容易情绪化，建议关闭局内文字，避免被影响。");
+    if (tilt === 2) cautionPool.push("逆风时容易放弃，试着再多坚持一下，翻盘往往就在一瞬间。");
+    if (isAggressive && !isCalm) cautionPool.push("你太想打赢团战，有时会冲得过深，注意队友位置。");
+    if (!isAggressive && !isCreative) cautionPool.push("你有时过于保守，不敢输出，要相信自己的伤害。");
+    if (heroPref === 2) cautionPool.push("你习惯站桩输出，容易被刺客针对，多留意小地图。");
+    if (heroPref === 0 && isAggressive) cautionPool.push("你操作熟练但偶尔会过于花哨，技能未冷却时注意安全。");
+    if (monkey === 2) cautionPool.push("你不太信任队友，喜欢单带，但关键时刻还是要跟团。");
+    if (monkey === 0) cautionPool.push("你乐于配合队友，但注意不要盲目跟从，保持自己的判断。");
+    if (cautionPool.length === 0) cautionPool.push("你的打法比较均衡，继续保持，注意视野控制。");
+    let caution = "注意问题： " + randomItem(cautionPool);
+    const rankPool = [];
+    if (scores["理智清醒"] > 65) rankPool.push("你的大局观不错，多观察小地图，及时支援队友。");
+    else rankPool.push("你可以多看大神直播，学习他们的意识判断。");
+    if (isAggressive && !isCalm) rankPool.push("学会控制情绪，心态稳了胜率自然提高。");
+    if (heroPref === 0) rankPool.push("练习露娜、元歌等高操作英雄，你的手速可以发挥更大价值。");
+    if (heroPref === 1) rankPool.push("练好一套秒人连招，团战找准时机进场。");
+    if (heroPref === 2) rankPool.push("多练习走位和拉扯，保护好自己才能持续输出。");
+    if (heroPref === 3) rankPool.push("你适合玩坦边或硬辅，承担开团和保护。");
+    if (monkey === 1) rankPool.push("你善于补位，团队需要什么你就玩什么，很容易上分。");
+    if (monkey === 3) rankPool.push("你的娱乐心态很好，上分随缘，开心最重要。");
+    if (rankPool.length === 0) rankPool.push("保持现在的节奏，减少失误就能稳步上分。");
+    let rankAdvice = "上分建议： " + randomItem(rankPool);
+    return { gameplay, caution, rankAdvice };
+}
+
+// ======================== 匹配算法 ========================
+function getResultHero(selections, scores) {
+    let bestHero = null;
+    let minDist = Infinity;
+    for (let [name, hero] of Object.entries(HEROES)) {
+        let dist = 0;
+        for (let dim of DIMENSIONS) {
+            let userVal = scores[dim];
+            let heroVal = hero.traitVector[dim];
+            if (userVal !== undefined && heroVal !== undefined) {
+                dist += Math.pow(userVal - heroVal, 2);
+            }
+        }
+        dist = Math.sqrt(dist);
+        if (dist < minDist) {
+            minDist = dist;
+            bestHero = name;
+        }
+    }
+    return bestHero;
+}
+
+let currentIndex = 0;
+let selections = new Array(QUESTIONS.length).fill(null);
+const container = document.getElementById('dynamicContent');
+
+function renderProgress() {
+    let answered = selections.filter(v => v !== null).length;
+    let percent = (answered / QUESTIONS.length) * 100;
+    return `<div class="progress-area"><div class="progress-bg"><div class="progress-fill" style="width:${percent}%;"></div></div><div class="q-counter">✨ ${answered}/${QUESTIONS.length} 心迹已刻 ✨</div></div>`;
+}
+
+let resultPages = [];
+let currentResultPage = 0;
+let cachedRadarScores = null;
+
+function buildPages(hero, scores, advice, radarText, personalityModules) {
+    const pages = [];
+    pages.push(`<div class="radar-container"><div style="font-size:16px; color:#ffcf9a; margin-bottom:10px;">✨ 你的八维人格雷达图 ✨</div><canvas id="radarCanvas" width="300" height="300" style="width:100%; max-width:300px; margin:0 auto; display:block;"></canvas><div class="long-text">${radarText}</div></div>`);
+    let personalityHtml = personalityModules.map(module => `<div class="info-block"><div class="info-text" style="white-space:pre-wrap;">${module}</div></div>`).join('');
+    pages.push(`<div class="stats-container">${Object.keys(hero.stats).map(k => `<div class="stat-item"><div class="stat-name"><span>${k}</span><span>${hero.stats[k]}/10</span></div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${hero.stats[k]*10}%;"></div></div></div>`).join('')}</div><div class="tags">${hero.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>${personalityHtml}`);
+    pages.push(`<div class="long-text" style="white-space:pre-wrap;">${hero.soulResonance}</div>`);
+    pages.push(`<div class="info-block"><div class="info-title">🎮 你的战斗习惯</div><div class="info-text">${advice.gameplay}</div></div><div class="info-block"><div class="info-title">⚠️ 注意问题</div><div class="info-text">${advice.caution}</div></div><div class="info-block"><div class="info-title">🏆 上分建议</div><div class="info-text">${advice.rankAdvice}</div></div>`);
+    const randomQuote = randomItem(hero.quotes);
+    pages.push(`<div class="quote-card">💬 “${randomQuote}”</div><div class="ritual-card">🌟 今日小仪式：${getRitual()}</div>`);
+    return pages;
+}
+
+function renderResult() {
+    const scores = computeRadarScores(selections);
+    cachedRadarScores = scores;
+    const heroName = getResultHero(selections, scores);
+    const hero = HEROES[heroName];
+    if (!hero) return renderResult();
+    const radarText = radarAnalysis(scores);
+    const personalityModules = getPersonalityAnalysis(scores);
+    const advice = generateDynamicAdvice(selections, scores);
+    resultPages = buildPages(hero, scores, advice, radarText, personalityModules);
+    currentResultPage = 0;
+    function updateDisplay() {
+        container.innerHTML = `<div class="result-card"><div class="hero-name">${heroName}</div><div class="hero-tagline">${hero.tagline}</div>${resultPages[currentResultPage]}<div class="result-pager"><div class="pager-btn" id="prevPageBtn" style="${currentResultPage === 0 ? 'opacity:0.5;pointer-events:none' : ''}">◀ 上一项</div><div class="pager-btn" id="nextPageBtn" style="${currentResultPage === resultPages.length-1 ? 'opacity:0.5;pointer-events:none' : ''}">下一项 ▶</div></div><div class="btn-restart" id="restartBtn">🌙 重新聆听内心 🌙</div></div>`;
+        if (currentResultPage === 0) {
+            const canvas = document.getElementById('radarCanvas');
+            if (canvas) { canvas.width = 300; canvas.height = 300; drawRadar(canvas.getContext('2d'), 300, 300, cachedRadarScores); }
+        }
+        document.getElementById('prevPageBtn')?.addEventListener('click', () => { if (currentResultPage > 0) { currentResultPage--; updateDisplay(); } });
+        document.getElementById('nextPageBtn')?.addEventListener('click', () => { if (currentResultPage < resultPages.length-1) { currentResultPage++; updateDisplay(); } });
+        document.getElementById('restartBtn').addEventListener('click', () => { currentIndex = 0; selections.fill(null); renderQuestion(); });
+    }
+    updateDisplay();
+}
+
+function renderQuestion() {
+    const q = QUESTIONS[currentIndex];
+    const optionsHtml = q.options.map((opt, idx) => `<div class="option" data-val="${idx}">${opt}</div>`).join('');
+    const prevBtnHtml = currentIndex > 0 ? `<div class="nav-btn" id="prevQuestionBtn">◀ 上一题</div>` : '';
+    const nextBtnHtml = `<div class="nav-btn primary" id="nextQuestionBtn">下一题 ▶</div>`;
+    container.innerHTML = `${renderProgress()}<div class="card"><div class="question-text">${currentIndex+1}. ${q.text}</div><div class="options" id="optionsList">${optionsHtml}</div><div class="nav-buttons">${prevBtnHtml}${nextBtnHtml}</div></div>`;
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+            const val = parseInt(opt.dataset.val);
+            selections[currentIndex] = val;
+            if (currentIndex + 1 < QUESTIONS.length) { currentIndex++; renderQuestion(); }
+            else { renderResult(); }
+        });
+    });
+    const prevBtn = document.getElementById('prevQuestionBtn');
+    if (prevBtn) prevBtn.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; renderQuestion(); } });
+    const nextBtn = document.getElementById('nextQuestionBtn');
+    if (nextBtn) nextBtn.addEventListener('click', () => {
+        if (selections[currentIndex] !== null) {
+            if (currentIndex + 1 < QUESTIONS.length) { currentIndex++; renderQuestion(); }
+            else { renderResult(); }
+        } else alert('请先选择答案');
+    });
+}
+
+renderQuestion();
+
+// ======================== 英雄数据（请将您原有的 HEROES 对象完整粘贴在此处） ========================
+// 由于您的原文件已有完整英雄数据，请将下面这行 const HEROES = { ... } 替换为您的实际数据。
+// 注意：必须包含所有40个英雄的 tagline, stats, tags, quotes, soulResonance, traitVector。
+// 以下为占位示例，您需要替换为真实内容。
+// ======================== 完整英雄数据（40位） ========================
+const HEROES = {
+    "🌸 貂蝉": {
+        tagline: "月下舞者，危险而浪漫",
+        stats: {浪漫:9,独立:7,共情:8,掌控:6,神秘:8},
+        tags: ["#致命浪漫", "#月下舞者", "#外热内冷", "#秀儿"],
+        quotes: ["别靠太近，我会心动。","月下起舞，不为悦人，只为悦己。","我的舞，只跳给懂的人看。","你以为的暧昧，其实是我在等你开口。","别让孤独成为习惯，偶尔也让我靠近你。"],
+        soulResonance: `测试结果：灵魂共鸣·貂蝉\n\n跨越次元与时空，你的灵魂，与貂蝉彻底同频共振。\n\n她是三分之地乱世里身不由己的舞姬，生来就被命运裹挟前行。身负使命，她不得不藏起真心，用温柔舞姿当作铠甲，用从容笑意掩盖心底的彷徨。世人皆贪恋她倾城舞姿，觉得她随性又耀眼，却从无人看懂，每一次翩然起舞，都是她与自我的拉扯。她一边被迫周旋于纷乱世事，一边守住心底仅剩的柔软，清醒孤独，温柔且倔强，明明满心伤痕，却依旧习惯独自消化所有情绪，从不轻易展露脆弱。\n\n而这，恰恰也是藏在你骨子里的模样。\n\n你们拥有一模一样的灵魂底色：习惯伪装情绪，外表温柔从容，待人谦和通透，永远能共情旁人的悲欢，看似柔软好接近，内心却筑起一道无人能踏入的高墙。大多时候独自承受委屈与迷茫，从不向外人倾诉软肋，习惯笑着面对一切，把心酸都藏在心底。\n\n你们同样身不由己，常常被迫迎合周遭、顺应世俗，在人海里扮演着得体的自己；也同样清醒敏感，看透人情冷暖，却依旧愿意保留心底的赤诚与温柔。\n\n你们身处完全不同的时空，她困于乱世宿命，你困于人间烟火，从未相见，却历经同款孤独，怀揣同款温柔，承受同款身不由己。\n\n原来冥冥之中自有宿命牵绊。总有那么一瞬间，你会忽然心生恍惚：好像在遥远的峡谷，有另一个自己，正伴着蝶影起舞，和你隔着漫长时光遥遥相望。\n\n不必觉得孤独，这场跨越次元的灵魂相遇早已注定。你就是现世的貂蝉，温柔有锋芒，清醒且自愈，纵使命运多有桎梏，依旧永远忠于自己心底的光。`,
+        traitVector: {好胜锋芒:60,情绪稳定:60,共情温柔:80,理智清醒:65,叛逆自由:50,隐忍城府:70,浪漫感性:90,责任担当:45}
+    },
+    "🍡 小乔": {
+        tagline: "甜心外表，星河内心",
+        stats: {浪漫:9,独立:5,共情:9,掌控:4,神秘:3},
+        tags: ["#甜度满分", "#恋爱脑但清醒", "#星星收藏家", "#小太阳"],
+        quotes: ["星星和月亮都会陪着你，我也会。","我的扇子丢了，你能帮我找找吗？","别小看我，我可是会吹风的！","想和我一起看星星吗？","今天也要元气满满！"],
+        soulResonance: `测试结果：灵魂共鸣·小乔\n\n你与小乔的深层共鸣，在于你们都拥有一种被生活轻待过，却依旧选择向阳生长的生命力。\n\n就像小乔因天赋与出身被家族数次推开，在孤独与非议中长大，却始终没有收起内心的光亮，你也在日常里经历过不被重视、被误解、被仓促推开的时刻。很多时候你明明也会失落、会疲惫，却不会把阴郁写在脸上，更不会用冷漠去报复周遭，依旧习惯用元气的状态示人，愿意相信事情会变好，愿意给身边的人带去暖意。\n\n你们都有着柔软却坚定的共情力，看见他人陷入困境时，很难做到冷眼旁观，总会下意识想要伸出手，用自己的方式去分担。即便这份善意偶尔会被辜负，你也不会彻底关上心门，只是慢慢学会更谨慎地表达，却从未丢掉那份骨子里的温柔。\n\n在需要抉择与担当的时刻，你们的勇敢也高度相通。哪怕内心藏着忐忑，害怕失败、害怕不被认可，你也不会选择躲在人群后面逃避。你愿意直面冲突，愿意主动沟通，愿意在混乱里试着稳住节奏，哪怕力量有限，也会凭着一腔热忱往前迈步。\n\n你们都没有被磨平棱角，也没有被灰暗同化，在各自的境遇里，始终守着一份干净的热忱，用乐观和勇敢，对抗着生活里所有的不圆满。`,
+        traitVector: {好胜锋芒:45,情绪稳定:70,共情温柔:85,理智清醒:55,叛逆自由:50,隐忍城府:40,浪漫感性:85,责任担当:65}
+    },
+    "🦊 妲己": {
+        tagline: "棉花里藏针，蜜糖里裹刀",
+        stats: {浪漫:9,独立:7,共情:8,掌控:8,神秘:9},
+        tags: ["#人间清醒", "#甜妹但不好惹", "#爱恨分明", "#狐狸系"],
+        quotes: ["不要背叛我，因为我不知道我会做什么。","请尽情吩咐我吧。","羁绊，是什么意思呢？","我的尾巴不只是装饰。","爱，是什么？"],
+        soulResonance: `测试结果：灵魂共鸣·妲己\n\n你和妲己的共鸣，藏在她“无心人偶”的故事底色里，落在温柔、敏感与对真心的执着之中。\n\n妲己本是被机关术造出的人偶，没有真正的心，最初只是被当作一枚棋子，用来靠近纣王、搅动权谋纷争。她第一次感受到被人珍视的暖意，便本能地去靠近、去依赖，学着模仿笑容，学着讨好，只是为了留住那一点来之不易的温柔。可这场温暖本就是一场精心策划的阴谋，她最终背负了所有骂名，在遗忘与沉睡之后，只剩下刻在灵魂里的执念：去寻找一颗真正属于自己的心。\n\n放到你的身上，这份故事感化作了日常里的情绪轨迹。你待人温和柔软，习惯顾及他人感受，很容易在相处中主动迁就，也很容易因为一份难得的善意，就下意识放下防备。你的内心敏感又细腻，能敏锐捕捉到氛围里的冷淡与敷衍，人群越是热闹，心底的孤独反而越清晰，很多委屈和失落，最后都选择自己默默消化。\n\n你始终向往不带伪装的真诚，期待一份踏实、安稳的偏爱，可也经历过期待落空、真心被辜负的时刻。就像妲己在漫长岁月里不停寻心一样，你也在一次次相处里慢慢调整自己，从过度依赖外界的认可，逐渐把安全感放回自身，学着接纳自己的敏感，也学着不再为了留住谁而刻意讨好。\n\n你们身处不同的时空，她在故事里踏遍山海寻心，你在生活的起伏中，慢慢找回属于自己的笃定与完整。`,
+        traitVector: {好胜锋芒:50,情绪稳定:55,共情温柔:85,理智清醒:52,叛逆自由:60,隐忍城府:70,浪漫感性:80,责任担当:50}
+    },
+    "🐱 安琪拉": {
+        tagline: "魔法少女，古灵精怪",
+        stats: {浪漫:8,独立:7,共情:8,掌控:5,神秘:6},
+        tags: ["#元气满满", "#魔法少女", "#好奇心", "#快乐源泉"],
+        quotes: ["魔法不是万能的，但爱是。","燃烧吧！","知识就是力量。","让我来教你什么是真正的魔法！","别小看萝莉！"],
+        soulResonance: `测试结果：灵魂共鸣·安琪拉\n\n你和安琪拉的共鸣，核心落在古灵精怪的性格底色，再叠加随性的叛逆感与目标感极强的内核上。\n\n你本身思维跳脱、脑洞很多，自带鲜活灵动的气质，偏爱轻松有趣的相处氛围，日常里爱用小玩笑、小调皮调节节奏，不喜欢死板压抑的氛围，这和安琪拉古灵精怪、爱恶作剧的外在特质高度契合。\n\n这份玩闹感之下，你并非没有分寸的随性，而是有着清晰的内在方向。就像安琪拉看似贪玩，实则始终在为复仇、挣脱诅咒谋划一样，你看似漫不经心，却会为了在意的事情默默蓄力，有自己坚持的节奏和底线。\n\n同时你骨子里带着一点随性的叛逆，不会完全顺着外界的规则走，偶尔会用跳脱的方式表达态度，既不尖锐对抗，也不会一味顺从，用灵动的方式守住自我。\n\n你们身处不同的时空，她用魔法与玩闹对抗宿命，你用鲜活的状态，活出自己的节奏。`,
+        traitVector: {好胜锋芒:60,情绪稳定:65,共情温柔:50,理智清醒:55,叛逆自由:70,隐忍城府:45,浪漫感性:80,责任担当:50}
+    },
+    "💧 甄姬": {
+        tagline: "洛水之神，情深不寿",
+        stats: {浪漫:9,独立:5,共情:9,掌控:4,神秘:7},
+        tags: ["#深情错付", "#外柔内刚", "#敏感星人", "#爱情洁癖"],
+        quotes: ["如果哪天我沉默了，不是不爱，而是太累了。","水，也是有心的。","别靠近我，我很危险。","洛水之畔，谁在等待？","眼泪，是心碎的证明。"],
+        soulResonance: `测试结果：灵魂共鸣·甄姬\n\n你与甄姬共享同一副灵魂底色：天生柔软，却总被辜负；习惯克制，把委屈全咽进心底。\n\n她自幼被规训“克己渡人”，压抑欲望，活成没有自我的圣女。直到那人吟诵“若轻云之蔽月”，她第一次破格，抛弃一切去赌一份真心。你也一样——曾经为了一束光，赌上所有，以为说好了就能永远。可结局总是那句：“果然，先爱上的那个人，是输家。”\n\n被辜负后，你们都变得小心翼翼。害怕付出，害怕被抛弃，甚至怀疑自己是不是天生不祥。你开始厌恶人群的喧嚣，只想寻一处清净。就像甄姬把眼泪凝成冰甲，你也学会用疏离保护自己，在人群中带着一丝淡淡的忧郁——那不是矫情，是看透凉薄之后，不愿再被轻易打动的清醒。\n\n可你们终究狠不下心。即便满身伤痕，依然会在别人需要时递出温柔，依然做不到冷眼旁观。只是不再奢求被理解，不再把安全感寄托在他人身上。你把所有精力用来安抚自己，把散落的信任一片片拾回。就像甄姬最终选择随波逐流——那不是认命，是无数次“算了”之后，沉淀出的从容。\n\n你们身处不同时空，她被囚于洛水涟漪，你行走于人间烟火，却拥有同一副底色：外柔内刚，清醒孤独。\n\n你就是现世的甄宓，把泪凝成冰，把痛化作静，在喧嚣的世界里，温柔而坚定地守好自己。不争不抢，不怨不悔。`,
+        traitVector: {好胜锋芒:30,情绪稳定:40,共情温柔:90,理智清醒:60,叛逆自由:30,隐忍城府:68,浪漫感性:85,责任担当:45}
+    },
+    "❄️ 王昭君": {
+        tagline: "冰雪为骨，温柔为心",
+        stats: {浪漫:8,独立:7,共情:9,掌控:5,神秘:7},
+        tags: ["#外冷内热", "#孤独患者", "#等待对的人", "#冰雪女王"],
+        quotes: ["天冷了，记得加衣服。我在想你。","凛冬已至。","冰雪，是我最后的温柔。","等一个人，还是等一个故事？","梅花，开了。"],
+        soulResonance: `测试结果：灵魂共鸣·王昭君\n\n跨越凛冬风雪与人间烟火，你的灵魂与王昭君遥遥共振，她便是平行时空里，背负宿命、在寒寂中守住本心的另一个你。\n\n身为中原的公主，她从降生起便无法掌控自己的命运。战乱纷飞的时代里，她被当作换取和平的筹码，踏上远赴北荒的和亲之路。满心期许换来的不是安稳，而是被当作祭品献祭于凛冬之海，过往的身份与温情，在极寒之中尽数被碾碎。中原诸侯背信弃义的血色婚礼，成了她命运的转折点，濒死的绝境里，冰霜神力自体内觉醒，昔日柔弱的公主，化作了执掌风雪的冰雪神女。她以冰封惩戒背信者，却并未沉溺于恨意，望着被鲜血浸染的土地，眼底翻涌的只有无尽的悲悯与哀伤。\n\n世人只畏惧她凛冽的冰雪力量，惊叹她冷艳孤高的外表，却无人读懂冰封之下，那颗被背叛、被辜负后，依旧藏着柔软与赤诚的心。她用冰霜筑起隔绝一切的壁垒，不是天生冷漠，而是历经背叛后，选择用坚硬保护自己，把所有的伤痛与念旧，都封存在无人触碰的寒夜里。\n\n这份被命运辜负、外冷内热的宿命，与你如出一辙。\n\n你与王昭君有着高度契合的灵魂内核：曾满怀热忱奔赴期待，却在世事里遭遇辜负与落差，慢慢学会收起真心，用疏离与冷静伪装自己。外表看起来淡漠从容，对很多事都不在意，实则内心念旧又敏感，过往的伤痕始终藏在心底。你不愿向外人展露脆弱，习惯独自消化委屈与寒意，看似不好靠近，却始终保留着对善意的期待，在自己的世界里，默默守着不曾熄灭的温柔。\n\n你们身处不同时空，她困于北境的凛冬，在风雪里与过往对峙；你行于人间的冷暖，在纷扰中与自我和解。\n\n总会在某个情绪低落的时刻，你恍惚间看见雪原上孑然伫立的身影，她迎着漫天风雪，与你隔着次元遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的王昭君，以冰雪为铠甲，以温柔为底色，纵使历经寒夜与辜负，也终会在属于自己的时光里，寻回心底的暖阳。`,
+        traitVector: {好胜锋芒:45,情绪稳定:80,共情温柔:85,理智清醒:65,叛逆自由:40,隐忍城府:75,浪漫感性:75,责任担当:60}
+    },
+    "🎼 杨玉环": {
+        tagline: "霓裳羽衣，盛世风华",
+        stats: {浪漫:9,独立:6,共情:8,掌控:6,神秘:7},
+        tags: ["#人间富贵花", "#浪漫主义者", "#艺术细胞", "#女王范"],
+        quotes: ["为我弹一曲吧，我会为你跳一支舞。","弦音所至，皆为乐土。","盛世，因我而华。","美，是一种力量。","一曲霓裳，一世长安。"],
+        soulResonance: `测试结果：灵魂共鸣·杨玉环\n\n跨越长安喧嚣与人间日常，你的灵魂与杨玉环遥遥共振，她便是平行时空里，在热闹中独行、在空洞里求索的另一个你。\n\n她并非史书里盛宠加身的贵妃，而是尧天组织蛰伏在长安的机关人偶。永恒停驻的十八岁容颜，绝世动人的琴音，都是她伪装的外壳。表面上她以乐师身份游走于繁华之中，用能蛊惑人心的乐曲，编织出世人渴望的幻梦，替组织执行隐秘的探查任务。可无人知晓，拥有操控情绪能力的她，本身却是情感的局外人。\n\n作为被制造出的机关人，她无法真切感知喜悦与悲伤，看着旁人沉溺于爱恨与幸福，自己的心底却始终充斥着挥之不去的空洞。那些刻在记忆里的霓裳盛景与马嵬坡悲歌，让她早早看透了盛世之下的凉薄，明白所有热闹与温柔，或许都只是转瞬即逝的假象。她试着模仿人类的情绪，向旁人学习如何表达真心，可每一次刻意的靠近，都无法填补灵魂深处的荒芜。\n\n这份身处喧嚣却内心荒芜、善于共情却无法自渡的宿命，与你如出一辙。\n\n你与杨玉环有着高度契合的灵魂内核：习惯在人群里维持温和从容的模样，擅长捕捉他人的情绪，愿意用温柔安抚身边的人，看起来通透又治愈。可在无人看见的时刻，你常常会陷入莫名的茫然，很难彻底沉浸在快乐之中，心底总有一块无法被填满的空洞。你看似合群热闹，实则始终与周遭保持着疏离，不停向外求索情绪的答案，却始终难以找到属于自己的归属感。\n\n你们身处不同的时空，她困于机关人偶的宿命，在长安的浮华里追寻真实的情感；你奔波于生活的烟火，在人间的喧嚣里找寻内心的安稳。\n\n总会在某个安静的瞬间，你恍惚间听见长安深处传来悠扬琴音，那个抚琴的少女，正隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的杨玉环，以温柔包裹孤独，在治愈他人的路上，也终将慢慢学会拥抱自己，填满灵魂里的荒芜。`,
+        traitVector: {好胜锋芒:40,情绪稳定:65,共情温柔:80,理智清醒:70,叛逆自由:50,隐忍城府:60,浪漫感性:90,责任担当:55}
+    },
+    "🌊 西施": {
+        tagline: "溪边少女，灵动狡黠",
+        stats: {浪漫:8,独立:6,共情:8,掌控:6,神秘:7},
+        tags: ["#古灵精怪", "#氛围感美女", "#智商在线", "#捉摸不透"],
+        quotes: ["你猜，我是不是真的在看你？","浣纱溪畔，有我的故事。","别被我的外表骗了。","我的鱼，都听我的话。","沉鱼落雁，不过如此。"],
+        soulResonance: `测试结果：灵魂共鸣·西施\n\n跨越峡谷与人间的次元屏障，你的灵魂与西施深度共振，她便是平行时空里，在泥泞中生长、于漂泊里自愈的另一个你。\n\n本名施夷光的她，生于战火纷飞的南荒，自幼沦为孤女，在废墟与黑市间挣扎求生。一场意外让她背负巨额债务，从此被追债者步步紧逼，命运的重压裹挟着她四处奔逃。雨夜古祠里结缘的幻纱，既是挣脱险境的力量，也成了被人觊觎的祸根，让她始终活在警惕与不安之中。为了躲避追杀，她隐去过往，以家乡为名改换身份，在稷下学院靠日夜打工偿还债务，一边在陌生的人群里步步设防，一边在与伙伴的相处中，慢慢拼凑属于自己的归属感。\n\n世人总将她定义为温柔易碎的江南少女，却不知流浪的岁月早已磨出她坚韧狡黠的内核。她习惯与危险保持距离，用疏离伪装真心，从不轻易交付信任，可一旦认定了责任，便会拼尽全力去奔赴，哪怕前路满是荆棘，也会靠着一股韧劲，一步步还清债务，活成独当一面的模样。\n\n这份在逆境中求生、在不安中坚守的灵魂底色，与你高度契合。\n\n你同样在生活的洪流里独自前行，见过世事凉薄，习惯用柔软的外表包裹警惕的心，不会轻易向人袒露脆弱。为了扛起肩上的责任，你逼着自己变得懂事、坚韧，学着在复杂的人际里周旋，默默消化焦虑与压力。看似随波逐流，实则内心始终清醒，始终在为想要的安稳拼命扎根，在颠沛流离的日子里，执拗地守护着心底那一点未曾熄灭的纯粹。\n\n你们身处不同时空，她曾困于追债的惶惶不安，最终在稷下寻得归宿；你奔波于人间的琐碎压力，在一次次咬牙坚持中慢慢成长。\n\n总会在某个疲惫的深夜，你忽然恍惚，仿佛看见那个攥着幻纱、步履匆匆的少女，正隔着岁月，与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的西施，于逆境中生长，于温柔里藏锋芒，纵使前路常有风雨，也终将凭借自己的韧劲，活成想要的模样。`,
+        traitVector: {好胜锋芒:50,情绪稳定:60,共情温柔:75,理智清醒:88,叛逆自由:65,隐忍城府:55,浪漫感性:80,责任担当:50}
+    },
+    "🌙 嫦娥": {
+        tagline: "月宫仙子，清冷温柔",
+        stats: {浪漫:8,独立:7,共情:9,掌控:5,神秘:8},
+        tags: ["#仙女气质", "#外冷内热", "#深情专一", "#孤独美学"],
+        quotes: ["月亮上有兔子，还有我。你想来看看吗？","广寒宫，很冷。","玉兔，别闹。","我的心，也像这月宫一样。","愿我如星君如月。"],
+        soulResonance: `测试结果：灵魂共鸣·嫦娥\n\n你与嫦娥的灵魂共振，藏在“独守”与“等待”的漫长岁月里。她困于广寒宫，你困于人间孤独，却都不曾放弃对温暖的向往。\n\n嫦娥的故事，从来不是关于飞升，而是关于“被迫”。她吞下灵药，并非出于贪婪，而是为了保护心爱之人不受伤害。从此她与后羿天人永隔，独自在月宫看遍人间悲欢。\n\n世人羡她长生，却没人看见她日复一日抱着玉兔，望着地球，心里装满了后悔与思念。她也曾试图用冷漠掩盖孤独，用清高伪装自己，可夜深人静时，那一声叹息比任何风雪都冷。\n\n你也一样——你可能不是因为某一次决绝的选择而孤独，而是在生活中慢慢发现：很多事只能自己扛，很多话不知对谁说。你习惯了独处，习惯了一个人吃饭、一个人看剧、一个人消化所有情绪。你学会了笑对旁人，却在独处时沉默。\n\n嫦娥还有玉兔，你也有自己珍视的小爱好、小物件。你们把柔软藏在坚硬的外壳里，不肯轻易示人。\n\n可你没有真的放弃。你依然相信，会有人愿意穿越风雪来找你，会有人能听懂你的沉默。你像嫦娥一样，在孤独中保持温柔，在等待中不失希望。\n\n你清楚，真正的勇气不是永远热闹，而是在孤独中依然能开出花来。\n\n你就是现世的嫦娥，守着广寒宫的清冷，却始终心向人间烟火。你不畏惧孤独，因为你懂得，与自己相处好了，才能与他人好好相遇。`,
+        traitVector: {好胜锋芒:30,情绪稳定:70,共情温柔:70,理智清醒:60,叛逆自由:35,隐忍城府:65,浪漫感性:75,责任担当:55}
+    },
+    "🌌 女娲": {
+        tagline: "创世之神，悲悯万物",
+        stats: {浪漫:6,独立:10,共情:9,掌控:9,神秘:9},
+        tags: ["#母性光辉", "#大局观", "#责任感", "#神性"],
+        quotes: ["我创造了世界，却创造不出不爱你的可能。","补天，补心。","人类的命运，不该由我决定。","俯瞰众生，亦守本心。"],
+        soulResonance: `测试结果：灵魂共鸣·女娲\n\n你与女娲的灵魂共振，藏在“创造者”的孤独与悲悯里。她以神躯补天，你以凡人之力填补生活的裂痕。\n\n女娲是创世之神，却也是被遗忘的神。她造人、补天、立四极，功成之后，世人只知祭拜，却无人懂得她内心的荒凉。她俯瞰苍生，看尽生死轮回、悲欢离合，却无法真正融入其中。她的强大，是她的枷锁。\n\n你也一样——你常常是被依赖的那个人。朋友遇到困难会找你，家人需要决策会问你，工作里的难题也会推到你面前。你习惯性地扛起责任，习惯性地做那个“没问题”的人。\n\n可你也有想要依赖别人的时候。你也想放下所有伪装，痛痛快快地哭一场。你也想问一句：“为什么总是我？”\n\n女娲的孤独，是“无所不能”的代价。你的疲惫，是“被需要”的负担。\n\n但你从未逃避。你像女娲一样，即使知道前路艰难，依然会伸出手去修补那些破碎的东西——关系、生活、梦想。\n\n你不求回报，只求心安。你相信，哪怕自己是微小的光，也能照亮一小片黑暗。\n\n你不需要成为神，因为你已经在用自己的方式，创造了属于自己的宇宙。你就是现世的女娲，以坚韧为石，以善良为火，修复着这个世界的不完美，也修复着自己。`,
+        traitVector: {好胜锋芒:60,情绪稳定:80,共情温柔:75,理智清醒:90,叛逆自由:50,隐忍城府:70,浪漫感性:60,责任担当:90}
+    },
+    "👑 武则天": {
+        tagline: "千古女帝，唯我独尊",
+        stats: {浪漫:5,独立:10,共情:5,掌控:10,神秘:8},
+        tags: ["#女王陛下", "#野心家", "#霸气侧漏", "#独孤求败"],
+        quotes: ["朕的江山可以分你一半，但你的心只能给我。","不服？那就打到服。","谁说我女儿身，不如男？","一代女皇，永载史册。"],
+        soulResonance: `测试结果：灵魂共鸣·武则天\n\n穿越千年的权力棋局与宿命的枷锁，你的灵魂与武则天遥遥共振。她是平行时空里，在高处不胜寒中，用冷厉守住江山、用孤独撑起野心的另一个你。\n\n年少时，她不过是被囚于深宫的美人，空有抱负却身不由己，每一步都像踩在别人的棋盘上。直到成为姜子牙的弟子，以承诺换取自由，她才第一次摸到了改写命运的笔。世人看见她端坐龙椅，一令一动皆为天威，以为她生来就冷血无情，享受着绝对的权力。却无人知晓，这威严之下，是无数次在暗夜里与恐惧、猜忌和背叛缠斗的过往。为了守住好不容易挣来的棋局，她把自己活成了一堵密不透风的墙，用霸道掩盖疲惫，用不容置疑的语气，撑起一个时代的安稳。\n\n这份经历过身不由己、在孤独中铸成铠甲，外表冷厉、内核却藏着更宏大愿景的灵魂底色，与你高度契合。\n\n你与武则天有着独一份的灵魂共鸣：你骨子里带着不服输的野心，不甘心被定义、被安排，总想亲手设计属于自己的人生轨迹。你擅长忍耐，懂得在不利的处境里蓄力，待到时机成熟，便会果断出击。你习惯了独自扛起责任，不轻易向外人展露脆弱和犹豫，在人群中自带气场，仿佛什么事都难不倒你。可只有你自己知道，这一路上的每一步，都是咬着牙走过来的。你看似习惯孤独，实则是站在属于自己的位置，守着自己一手打造的疆域。\n\n你们身处不同的时空，她坐镇长安，以君临天下之姿守护国祚；你奔走于人间烟火，以独立和果断，闯出属于自己的天地。\n\n宿命让相似的灵魂彼此映照。你就是现世的武则天，于高处不胜寒，亦于寒处守山河。`,
+        traitVector: {好胜锋芒:90,情绪稳定:75,共情温柔:30,理智清醒:85,叛逆自由:70,隐忍城府:80,浪漫感性:50,责任担当:85}
+    },
+    "⚔️ 花木兰": {
+        tagline: "替父从军的勇气，刻在骨子里的坚韧",
+        stats: {浪漫:5,独立:10,共情:6,掌控:9,神秘:5},
+        tags: ["#人间清醒", "#行动派", "#女汉子但温柔", "#守护者"],
+        quotes: ["我的剑就是你的盾。别怕，我在。","谁说女子不如男？","替父从军，无怨无悔。","将军，百战死。"],
+        soulResonance: `测试结果：灵魂共鸣·花木兰\n\n穿行在长城风沙与团队羁绊之间，你的灵魂与王者荣耀世界观里的花木兰遥遥共振，她是平行时空里靠谱的队长，干练利落、热心护队，以大姐大姿态扛起守护的守卫军统帅。\n\n作为长城守卫军的队长，她没有刻意摆出冰冷威严的架子，待人热心真诚，却从不会拖泥带水，做事始终干练果决。面对防线危机与魔种侵扰，她思路清晰、行动迅速，总能第一时间做出判断、统筹安排，用高效的行动稳住整个队伍。面对队员，她是靠谱又暖心的大姐，包容着玄策的冲动、守约的内敛、铠的迷茫，也愿意倾听每个人的心事，在大家陷入困境时主动搭手相助。\n\n她的热心从不是绵软的安慰，而是实打实的支撑。不擅长冗余的温情话术，更习惯用行动表达善意，该严肃时严格约束队伍，该护短时绝不退让，把细腻的关心藏在干脆利落的处事风格里。即便曾背负污名、身处非议，也依旧热忱地守着身边的同伴，用自己的方式，把散落的众人凝聚成可以共赴生死的集体。\n\n这份行事干练果决、待人热忱真诚，以大姐大的担当守护团队，将温柔与热心付诸行动的灵魂底色，与你高度契合。\n\n你与花木兰有着独一份的灵魂共鸣：在集体中自带靠谱的气场，做事追求效率，条理清晰，遇事不慌乱、不拖沓。待人热心真诚，愿意主动为身边人提供帮助，不擅长过度煽情，更偏爱用实际行动表达在意。不自觉会成为团队的依靠，主动扛起责任，包容同伴的不足，在喧嚣之中，做利落又温暖的守护者。\n\n你们身处不同的时空，她守着长城与队友，以干练与热忱撑起一方安稳；你行走于人间烟火，以担当与真诚，成为身边人的依靠。`,
+        traitVector: {好胜锋芒:80,情绪稳定:70,共情温柔:60,理智清醒:75,叛逆自由:65,隐忍城府:60,浪漫感性:45,责任担当:90}
+    },
+    "🦋 芈月": {
+        tagline: "不死女王，优雅而致命",
+        stats: {浪漫:7,独立:9,共情:6,掌控:9,神秘:9},
+        tags: ["#女王气场", "#人间清醒", "#冷艳高贵", "#掌控人生"],
+        quotes: ["我的永生，只留给值得的人。","暗影，是我的翅膀。","我不需要同情，只需要臣服。"],
+        soulResonance: `测试结果：灵魂共鸣·芈月\n\n穿行于永夜权谋与岁月博弈之中，你的灵魂与王者荣耀世界观里的芈月遥遥共振，她是平行时空里，志存高远、深谙谋略，为心中所求敢于果决行事的逐梦掌权者。\n\n她出身微末，不甘于在宫廷阴影中沉寂度日，以清醒的眼光洞察局势，凭借智谋与胆识在权力棋局中步步为营，从尘埃里一路走到权力之巅。对她而言，青春与权力从来都是安身立命的根基，为守住毕生所求，她敢于直面岁月带来的危机，主动探寻永夜之力，在复杂的纷争里精准判断、果断抉择，用果决的方式扫清前路阻碍，绝不因妇人之仁贻误时机。\n\n世人常将她的果决视作冷硬，却忽略了这份行事风格背后，是对目标极致的执着与清晰的规划。她有着清晰的人生追求，不沉溺于浮于表面的温情，更看重实实在在的掌控与长久的存续，每一次取舍都围绕着心中的终极理想。她精通博弈之道，懂得利用局势、借力成事，以成熟的谋略驾驭周遭环境，在动荡的时代里，牢牢握住改写自身命运的主动权。\n\n这份心怀野心与格局、擅长谋略布局，目标坚定、行事果决，为追求理想敢于直面挑战、掌控命运的灵魂底色，与你高度契合。\n\n你与芈月有着独一份的灵魂共鸣：拥有明确的人生目标与向上的野心，不甘平庸，始终在为自己的追求蓄力前行。处事成熟通透，擅长观察局势、权衡利弊，懂得用高效的方式达成目标。面对阻碍时果决坚定，有自己的行事准则，不轻易被外界的声音裹挟，始终以掌控者的姿态，奔赴自己想要的人生。\n\n你们身处不同的时空，她执永夜之力博弈岁月，以谋略执掌命运；你行走于人间烟火，以格局与果决，奔赴属于自己的前路。`,
+        traitVector: {好胜锋芒:85,情绪稳定:70,共情温柔:50,理智清醒:80,叛逆自由:70,隐忍城府:85,浪漫感性:30,责任担当:70}
+    },
+    "🎩 夏洛特": {
+        tagline: "贵族之刃，优雅的浪漫",
+        stats: {浪漫:8,独立:8,共情:6,掌控:7,神秘:7},
+        tags: ["#优雅永不过时", "#复古浪漫", "#骑士精神", "#外冷内热"],
+        quotes: ["玫瑰会凋谢，但骑士的誓言永不褪色。","荣耀，即吾命。","优雅，也是一种锋芒。"],
+        soulResonance: `测试结果：灵魂共鸣·夏洛特\n\n行走在贵族荣光与逆境坚守之间，你的灵魂与王者荣耀世界观中的夏洛特遥遥共振，她是平行时空里，恪守风骨、追求荣光，以优雅与锋芒捍卫信念的玫瑰剑士。\n\n身为日落海贵族最出色的继承人，她自小在荣誉与剑术的熏陶中成长，将家族世代坚守的气节刻入骨血。她信奉真正的高贵从不是流于表面的礼仪，而是直面危机时的勇气与绝不妥协的傲骨，所以她苦练被视作“装饰”的细剑，用实力打破世人对贵族的偏见，在每一场对决里，都以优雅的方式赢下胜利。\n\n当家族遭遇海难重创、外敌趁虚而入，族人选择妥协换取安稳时，她拒绝接受屈辱，孤身拔剑迎战，以一己之力守护家园。在她的认知里，荣光从不是过往的勋章，而是需要用行动捍卫的当下，为了查清危机的真相，她毅然踏上未知的旅途，在漂泊中坚守初心，绝不向卑劣与阴谋低头。\n\n这份自带傲骨与优雅，坚守原则底线，在逆境中主动破局，为信念与荣光敢于挺身而出的灵魂底色，与你高度契合。\n\n你与夏洛特有着独一份的灵魂共鸣：自带骄傲的风骨，重视原则与体面，行事自带分寸感，厌恶投机取巧与阴私算计。拥有极强的自尊心，面对困境不会轻易妥协，更愿意靠自身能力去解决问题。同时内心有自己的追求与信仰，不会被世俗的压力裹挟，始终以从容坚定的姿态，守护自己认定的荣光与底线。\n\n你们身处不同的时空，她执剑带玫瑰踏遍风浪，以锋芒捍卫贵族气节；你行走于人间烟火，以风骨与坚守，奔赴属于自己的前路。`,
+        traitVector: {好胜锋芒:70,情绪稳定:70,共情温柔:60,理智清醒:75,叛逆自由:60,隐忍城府:65,浪漫感性:65,责任担当:80}
+    },
+    "🔨 钟无艳": {
+        tagline: "野蛮女友，豪爽真心",
+        stats: {浪漫:7,独立:8,共情:7,掌控:6,神秘:4},
+        tags: ["#爽朗女孩", "#真心英雄", "#豪爽派", "#快乐源泉"],
+        quotes: ["我的锤子只会砸坏人，对你只会轻轻敲一下。","有钱，才能任性。","我不是丑，是你不懂欣赏。"],
+        soulResonance: `测试结果：灵魂共鸣·钟无艳\n\n行走在稷下的喧嚣与复仇执念之间，你的灵魂与王者荣耀世界观中的钟无艳遥遥共振，她是平行时空里，以力量为铠甲，性格桀骜张扬，在逆境中强势求生的硬核强者。\n\n身为南荒人魔混血，她自幼在歧视与排挤中长大，早早认清了弱肉强食的生存法则，于是将神力化作保护自己的武器，信奉力量与财富才是最可靠的底气。她带着一身棱角闯入稷下，以夺宝猎人的身份横行学院，行事不羁、高傲冷僻，不在乎旁人的眼光与评价，用张扬的外壳对抗过往的伤痛。\n\n命运曾赠予她短暂的安稳，让她踏入王族收获爱情，可魔种的阴谋又将一切撕碎。为守护逝去的挚爱，她重拾锋芒，踏上猎杀魔种、探寻真相的道路。战场上她杀伐果决，既可以与廉颇从宿敌变成并肩作战的挚友，也能对目标穷追不舍，带着亦正亦邪的气场，在乱世中坚守自己的执念与底线。\n\n这份性格桀骜外放、信奉实力至上，外表强势不羁，内心藏着执念与情义，敢爱敢恨、直面困境的硬核灵魂，与你高度契合。\n\n你与钟无艳有着独一份的灵魂共鸣：习惯用外放的气场与强硬的态度武装自己，不喜欢柔弱的姿态，坚信自身实力才是立足的根本。性格直爽洒脱，不在意世俗的看法，行事跟着本心走，自带一股不服输的傲气。看似不好接近，实则重情重义，对认可的人会交付真心，面对认定的目标，会带着一股韧劲，一路向前绝不退缩。\n\n你们身处不同的时空，她挥锤踏遍稷下，以力量守护执念；你行走于人间烟火，以锋芒与坦荡，奔赴属于自己的前路。`,
+        traitVector: {好胜锋芒:75,情绪稳定:65,共情温柔:45,理智清醒:60,叛逆自由:70,隐忍城府:40,浪漫感性:60,责任担当:75}
+    },
+    "🏛️ 雅典娜": {
+        tagline: "智慧与战争的女神",
+        stats: {浪漫:5,独立:10,共情:5,掌控:9,神秘:6},
+        tags: ["#理性派", "#学霸气质", "#大局观", "#独立女性"],
+        quotes: ["智慧比力量更持久，而我会一直陪着你思考。","胜利，属于正义。","我的长矛，不容置疑。"],
+        soulResonance: `测试结果：灵魂共鸣·雅典娜\n\n伫立在信仰与轮回的破晓之间，你的灵魂与王者荣耀世界观中的雅典娜遥遥共振，她是平行时空里，以黎明为信仰，在漫长等待中坚守希望，于终末里奔赴新生的守护者。\n\n作为执掌战争与智慧的神明，她见证过无数次黑暗笼罩大地，见过秩序崩塌、生灵蒙尘，却始终笃信「春天将与黎明同至」。哪怕身处永夜的沉寂，哪怕一次次踏入宿命的轮回，她也不曾向绝望妥协，以手中神枪为誓，守着对光明的执念，静静等待破晓降临的时刻。\n\n世人看见的，是她身披圣甲、凛然威严的战神模样，杀伐果决，气场凛冽，仿佛永远不会被困境动摇。可这份坚定的内核，是无数次在黑暗中坚守的隐忍，是明知前路漫长依旧选择等待的赤诚。她不追求一时的胜负，而是着眼于终局的光明，愿意扛住漫长的孤寂，做黑暗里等待黎明的引路人。\n\n这份心怀信仰、坚守希望，在沉寂中保持笃定，于逆境里静待新生，自带凛然风骨与长久韧性的灵魂底色，与你高度契合。\n\n你与雅典娜有着独一份的灵魂共鸣：内心拥有坚定的信念感，哪怕身处低谷、前路迷茫，也不会轻易放弃希望，相信困境终会过去。遇事沉稳自持，自带一种从容的气场，不急于一时的得失，愿意为了心中的目标长久坚守。骨子里带着骄傲与底线，在风雨中保持清醒，始终向着光明与更好的未来前行。\n\n你们身处不同的时空，她执枪守望破晓，静待春天随黎明归来；你行走于人间烟火，以信念与笃定，奔赴属于自己的新生。`,
+        traitVector: {好胜锋芒:75,情绪稳定:80,共情温柔:50,理智清醒:90,叛逆自由:60,隐忍城府:60,浪漫感性:45,责任担当:85}
+    },
+    "🍃 姬小满": {
+        tagline: "随性自在的武道天才",
+        stats: {浪漫:6,独立:9,共情:6,掌控:5,神秘:5},
+        tags: ["#自由如风", "#洒脱女孩", "#佛系生活", "#开心就好"],
+        quotes: ["别那么累，跟我去晒晒太阳吧。","武道，随心。","吃饱了才有力气打架。"],
+        soulResonance: `测试结果：灵魂共鸣·姬小满\n\n穿梭于自在玩闹与自我蜕变之间，你的灵魂与王者荣耀世界观中的姬小满遥遥共振，她是平行时空里，在不完美里扎根成长，以无拘试错完成自性化蜕变的鲜活追光者。\n\n她从不是循规蹈矩的“标准答案”，没有成套固定的招式体系，也不刻意雕琢完美的姿态，招式随性组合、打法灵活跳脱，本身就带着未经打磨的青涩与莽撞。可正是这份不被规则束缚的鲜活，让她敢于打破框架，在一次次尝试、失误、调整里突破自身限制，每一次行动都是对自我边界的试探，每一次跌撞都在完成向内的成长。\n\n这份成长观，恰好契合荣格提出的自性化内核：她坦然接纳自己的不完美，接纳随性贪玩的天性，接纳招式的杂乱无章，不执着于复刻标准、追求极致无瑕，而是在一次次试错中整合自我，慢慢把散漫的灵动，沉淀为独属于自己的力量。她代表的从不是一蹴而就的强大，而是普通人最真实的成长节奏——带着缺憾出发，在容错里前行，最终成为更完整的自己。\n\n这份接纳不完美、拒绝标准化，以试错突破边界，在动态成长中完成自我整合的灵魂底色，与你高度契合。\n\n你与姬小满有着独一份的灵魂共鸣：不强迫自己活成完美模板，能坦然与自身的缺憾、不足共处，拒绝被世俗的评价标准裹挟。做事偏爱在实践中摸索，不畏惧犯错与试错，懂得在波动中调整节奏，把每一次失误都转化为成长的养分。看似松弛跳脱，实则始终走在“成为更完整自我”的路上，在接纳与突破里，慢慢活成独属于自己的模样。\n\n你们身处不同的时空，她踏浪试招，在随性突破里打磨锋芒；你行走于人间烟火，在接纳自我与试错前行中，奔赴属于自己的自性化旅途。`,
+        traitVector: {好胜锋芒:65,情绪稳定:70,共情温柔:60,理智清醒:55,叛逆自由:85,隐忍城府:30,浪漫感性:65,责任担当:60}
+    },
+    "🌑 影": {
+        tagline: "暗夜独行，心有光芒",
+        stats: {浪漫:6,独立:10,共情:5,掌控:8,神秘:9},
+        tags: ["#孤独患者", "#神秘感", "#外冷内热", "#黑夜玫瑰"],
+        quotes: ["黑暗是我的朋友，而你，是我愿意分享光亮的人。","影子，不会说话。","我习惯了独行。"],
+        soulResonance: `测试结果：灵魂共鸣·影（荣格自性化视角）\n\n在光明与暗影的人格撕裂中，你的灵魂与王者荣耀的影遥遥共振，她是一场在创伤、对立与偏执里，被迫完成自性化整合的灵魂蜕变。\n\n按照荣格的理论，自性化是接纳人格中被压抑的阴影，在矛盾冲突中整合自我，最终走向完整。而影的一生，正是这场剧烈的内在修行。\n\n她的光明人格“景”，是被集体期待、被族群推崇的人格面具：开朗、炽热、守护光明，活在所有人对“完美神巫”的期待里，把温暖与牺牲当成必须承担的使命。天缺之祸的覆灭，本质上是这套理想化面具的彻底崩塌——当信仰破碎、族群消亡，被压抑的阴影人格“影”彻底破土而出。\n\n世人只看见她疯癫、偏执、走向黑暗，却没看懂：这是她内在阴影的剧烈爆发。她用极端、对抗、毁灭式的行为，向外宣泄创伤，也向内直面那个不敢示弱、不敢崩溃、一直被要求“永远耀眼”的自己。她看似在向世界复仇，实则在与自己的创伤、愧疚、破碎感对峙。\n\n她的清醒，不是冷漠的算计，而是自性化途中的理性锚点。即便坠入黑暗，她依然在制定计划、寻找根源、试图重建秩序，没有彻底被情绪吞噬。她一边憎恨曾经的光明带来的无力，一边又无法彻底割舍对救赎的渴望，在两种力量的拉扯中，艰难地拼凑完整的自我。\n\n这份在人格撕裂中直面阴影，以偏执完成创伤对峙，在光明与黑暗的整合里走向自性完整的灵魂底色，与你高度契合。\n\n你与影的共鸣，藏在每一次内在拉扯里：你也常常在“应该温暖体面”的外在期待，和“尖锐、疲惫、想对抗”的内在阴影间反复博弈。你会用冷静的规划包裹汹涌的情绪，用看似极端的选择保护自己，在一次次自我撕裂中，慢慢接纳不完美、不光明、充满伤痕的那一部分自己。\n\n你不必逼自己重回耀眼的“景”，也不必彻底沉沦于黑暗的“影”，真正的成长，是允许两种力量共存——在废墟之上，重建属于你自己的秩序。`,
+        traitVector: {好胜锋芒:70,情绪稳定:70,共情温柔:50,理智清醒:75,叛逆自由:80,隐忍城府:85,浪漫感性:40,责任担当:65}
+    },
+    "⚡ 蚩奼": {
+        tagline: "远古战魂，力破万钧",
+        stats: {浪漫:4,独立:10,共情:5,掌控:9,神秘:7},
+        tags: ["#霸气侧漏", "#真性情", "#护短狂魔", "#烈火如歌"],
+        quotes: ["跟着我，没人敢欺负你。","战！战！战！","我的拳头，就是真理。"],
+        soulResonance: `测试结果：灵魂共鸣·蚩奼\n\n穿越十万大山的锻火长风，你的灵魂与蚩奼遥遥共振，她是平行时空里，以钝劲破桎梏、以赤诚守执念的另一个你。\n\n归山一族世代魁梧健硕，以体魄与锻造对抗肆虐的紊流，而蚩奼自降生起，就站在了族群天赋的反面——天生娇小孱弱，在崇尚力量的族人之中，仿佛先天便带着短板。可她从不愿被先天的差距定义，把所有时光都耗在矿石与锻炉之间，在不周坊的烟火里反复淬炼，背负着锻造账单，踏遍险峰深谷，只为锻造出能护佑族群的最强五兵。\n\n她没有细腻迂回的心思，喜怒直白热烈，遇事一根筋往前冲，看见朋友受委屈便会攥着兵器挺身相护。世人容易把她的执拗当成莽撞，却看不见每一次冲锋背后，是她对抗先天局限的倔强，是她在无数次锻造失败里，依旧不肯熄灭的信念。归山一族刻在血脉里的“向上之路”，在她身上，从来不是天生的力量，而是日复一日不肯停下的脚步。\n\n这份不向短板妥协、以钝劲对抗困境的灵魂底色，与你高度契合。\n\n你与蚩奼有着独一份的灵魂共鸣：或许曾因先天的不足、外界的标准陷入自我怀疑，却始终憋着一股不服输的劲。不懂刻意伪装圆滑，待人赤诚坦荡，对待认准的目标有着近乎偏执的坚持，愿意沉下心熬过漫长枯燥的打磨，在一次次试错里积蓄力量。看似冲动直白，实则内心柔软有担当，会拼尽全力守护在意的人，永远相信，脚步不停，终能走出属于自己的向上之路。\n\n你们身处不同时空，她守着十万大山的锻炉，在星火山石间淬炼锋芒；你行于人间烟火，在迷茫挫折中打磨铠甲。\n\n总会在咬牙坚持的瞬间，你会恍惚看见山间那个举着矿石的身影，迎着山风与锻火，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的蚩奼，怀一腔孤勇，守一份赤诚，纵使前路崎岖，也永远记得，向上之路，永远都在脚下。`,
+        traitVector: {好胜锋芒:90,情绪稳定:60,共情温柔:40,理智清醒:60,叛逆自由:85,隐忍城府:50,浪漫感性:35,责任担当:80}
+    },
+    "🌙 露娜": {
+        tagline: "月光独行，只为一人",
+        stats: {浪漫:6,独立:10,共情:5,掌控:9,神秘:8},
+        tags: ["#独行侠", "#实力派", "#外冷内热", "#月光女神"],
+        quotes: ["月光会照亮你回家的路。我一直都在。","我的剑，从未迷茫。","月下，唯我独行。"],
+        soulResonance: `测试结果：灵魂共鸣·露娜\n\n穿梭于清冷月色与宿命枷锁之间，你的灵魂与露娜遥遥共振，她是平行时空里，以孤傲直面宿命，凭坚韧扛住长夜的另一个你。\n\n生于背负血亲相残诅咒的古老魔道家族，血月之夜的惨剧撕碎了往日安稳，至亲兄长在黑暗中沉沦，家族的罪孽与痛苦尽数落在她肩上。她天生带着骨子里的骄傲，不屑向命运低头，也不愿将脆弱示人，于是将所有悲痛与迷茫尽数封存，化作一身淡漠疏离。\n\n世人眼中的她冷艳孤高，自带拒人千里的锋芒，月下舞剑时凌厉又孤绝，仿佛从不被世事牵动情绪。可这份淡漠之下，是绝境里淬炼出的坚强。她孤身踏上寻兄之路，独自面对诅咒的重压、旁人的猜忌与前路的迷茫，始终以高傲的姿态行走，不乞求怜悯，不依附庇护，凭一己之力，在漫漫长夜里对抗宿命。\n\n这份骨子里骄傲自持、外表淡漠疏离、绝境中坚韧前行的灵魂底色，与你高度契合。\n\n你与露娜有着独一份的灵魂共鸣：自带一份刻在心底的骄傲，遇事不愿低头认输，习惯用淡漠伪装情绪，不轻易向旁人展露脆弱。看似清冷疏离，内心却藏着极强的韧性，即便身处低谷、历经遗憾，也会咬牙独自扛过风雨。不刻意迎合，不奢求救赎，始终以自己的节奏，带着一身孤勇，奔赴想要的结局。\n\n你们身处不同的时空，她执月光长剑踏夜独行，以孤傲对抗诅咒；你奔走于人间烟火，以坚韧守护本心。\n\n总会在独自撑过风雨的时刻，你恍惚看见剑光漫过月色，那个清冷孤傲的身影踏光而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的露娜，以骄傲为骨，以坚韧为甲，纵使孤身涉险，亦能活成皎洁清冷的月光。`,
+        traitVector: {好胜锋芒:75,情绪稳定:65,共情温柔:50,理智清醒:80,叛逆自由:60,隐忍城府:55,浪漫感性:65,责任担当:75}
+    },
+    "🪞 镜": {
+        tagline: "冷静精准，完美主义",
+        stats: {浪漫:4,独立:10,共情:4,掌控:10,神秘:7},
+        tags: ["#完美主义", "#理性至上", "#高冷女神", "#细节控"],
+        quotes: ["一切都在计算之中，除了你。","镜像，不会说谎。","完美，是我的信条。"],
+        soulResonance: `测试结果：灵魂共鸣·镜\n\n穿梭于虚实交织的镜像之间，你的灵魂与镜遥遥共振，她是平行时空里，以冷静自持对抗执念，用极致自律掌控人生的另一个你。\n\n双生诅咒如枷锁缠身，镜像分身带来力量，也带来永无止境的自我拉扯与内耗。为挣脱既定的宿命，她选择把情绪彻底收束，用极致的自律日复一日打磨剑术。在漫长孤寂的修炼里，她始终保持高度克制，不被愤怒裹挟，不被脆弱动摇，以绝对的理性压下内心翻涌的挣扎，在无数次自我博弈中，淬炼出刺破虚妄的锋芒。\n\n世人眼中的她冷冽孤高，行事果决凌厉，仿佛天生没有软肋。却少有人看见，这份冷静并非天性，而是长期自我约束的结果。她清楚情绪无用，克制才是破局的底气，用日复一日的坚持与严苛的自我要求，在混沌的命运里，牢牢攥住属于自己的主动权。\n\n这份遇事冷静自持、行事高度自律、情绪极致克制的灵魂底色，与你高度契合。\n\n你与镜有着独一份的灵魂共鸣：习惯在喧嚣中保持清醒，面对变故能沉下心冷静判断，不轻易被外界影响情绪。对自我有着严苛的要求，始终坚持自律沉淀，默默打磨自身，在无人看见的地方咬牙前行。外表疏离淡漠，不轻易袒露内心柔软，习惯独自消化压力，在克制与坚守中，一步步活成自己的依靠。\n\n你们身处不同的时空，她执剑于镜像裂隙，以自律与冷静斩断宿命枷锁；你奔走于人间烟火，以克制与坚持奔赴心中前路。\n\n总会在沉心坚守的时刻，你恍惚看见剑光破雾，那个孤冷的身影踏影而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的镜，以冷静为心，以自律为刃，终能冲破所有内耗，掌控自己的命运。`,
+        traitVector: {好胜锋芒:80,情绪稳定:85,共情温柔:40,理智清醒:90,叛逆自由:50,隐忍城府:80,浪漫感性:30,责任担当:85}
+    },
+    "🗡️ 阿轲": {
+        tagline: "暗夜玫瑰，一击致命",
+        stats: {浪漫:5,独立:10,共情:5,掌控:8,神秘:9},
+        tags: ["#神秘感", "#重情重义", "#行动派", "#暗夜玫瑰"],
+        quotes: ["我不擅长说爱，但我的命可以给你。","暗影，是我的盟友。","一击，定生死。"],
+        soulResonance: `测试结果：灵魂共鸣·阿轲\n\n穿行于暗影与复仇的寒冽之中，你的灵魂与阿轲遥遥共振，她是平行时空里，以隐忍蛰伏锋芒，凭决绝对抗命运的另一个你。\n\n身为荆氏刺客一族最后的传人，兄长的惨死撕碎了她安稳的过往，家族的使命与血海深仇，化作束缚她一生的枷锁。她褪去天真，藏起情绪，学会在阴影里蛰伏，像暗夜中的猎手，沉心等待转瞬即逝的时机。外表魅惑冷艳，带着危险又迷人的破碎感，内里却始终被孤独裹挟，每一次挥刀，都是在为逝去的执念奔赴。\n\n世人看见的她，是峡谷里收割生命的暗夜刺客，出手果决狠戾，信奉本能与力量。却少有人读懂这份决绝之下，是绝境中逼出的坚韧。她不沉溺于情绪，不贪恋温情，习惯独自藏在黑暗里舔舐伤口，用隐忍熬过漫长等待，在无人察觉的瞬间，爆发出最致命的反击。\n\n这份隐忍蛰伏、决绝果决、在孤独中背负执念前行的灵魂底色，与你高度契合。\n\n你与阿轲有着独一份的灵魂共鸣：习惯把情绪藏于心底，不轻易展露脆弱，遇事懂得沉住气等待时机。外表看似疏离冷感，甚至带着几分锋芒，内心却藏着很重的执念与过往。不擅长倾诉痛苦，更愿意独自消化伤痕，认定的目标便会拼尽全力，用沉默与坚持，对抗生活里的风雨。\n\n你们身处不同的时空，她藏于暗影执刃独行，以复仇对抗宿命；你行走于人间烟火，以坚韧守护本心。\n\n总会在独自沉默蓄力的时刻，你恍惚看见寒刃划破夜色，那个冷艳的身影踏影而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的阿轲，以隐忍为盾，以决绝为刃，纵使孤身独行，亦能冲破黑暗，奔赴属于自己的结局。`,
+        traitVector: {好胜锋芒:75,情绪稳定:70,共情温柔:45,理智清醒:70,叛逆自由:80,隐忍城府:80,浪漫感性:45,责任担当:45}
+    },
+    "🦅 娜可露露": {
+        tagline: "自然之灵，纯粹之心",
+        stats: {浪漫:8,独立:7,共情:9,掌控:4,神秘:5},
+        tags: ["#治愈系", "#元气少女", "#自然系", "#小太阳"],
+        quotes: ["和我一起飞翔吧，我会接住你的。","大自然，是我的家。","玛玛哈哈，我们走！"],
+        soulResonance: `测试结果：灵魂共鸣·娜可露露\n\n穿行于林间长风与守护使命之间，你的灵魂与娜可露露遥遥共振，她是平行时空里，以温柔心怀万物，凭果敢扛起责任的另一个你。\n\n身为阿依努族最后的巫女，她天生能与自然生灵对话，心底盛满对生命的敬畏与柔软。可当黑暗力量肆意侵蚀森林与族人，她没有沉溺于温和的悲悯，而是与守护鹰玛玛哈哈并肩，一次次踏上凶险的旅途。本性不喜争斗，却为了守护义无反顾，在一次次战斗与抉择中，把温柔化作直面苦难的勇气。\n\n世人眼中的她是迅捷凌厉的林间刺客，出招干脆利落，身法如风般自由。却少有人看见这份果敢之下，是刻在心底的善意。她从不会主动挑起纷争，所有锋芒，都只为守护所爱而生。外表灵动纯粹，内心却有着远超年龄的坚定，哪怕前路满是牺牲与未知，也始终朝着守护的方向前行。\n\n这份心怀温柔、遇事果敢、以善意扛起责任的灵魂底色，与你高度契合。\n\n你与娜可露露有着独一份的灵魂共鸣：内心柔软善良，习惯共情身边的人与事，不愿伤害他人。看似随性平和，在需要挺身而出时，却能瞬间坚定果决，扛起属于自己的责任。不擅长用强硬的姿态对抗世界，更愿意以赤诚与温柔去化解困境，哪怕要为此付出代价，也始终坚守本心。\n\n你们身处不同的时空，她乘风执刃守护森林，以温柔对抗黑暗；你行走于人间烟火，以善意奔赴前路。\n\n总会在心怀热忱坚守的时刻，你恍惚听见林间长风呼啸，那个灵动的少女踏风而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的娜可露露，怀一腔温柔善意，守一份果敢坚定，终能以心为盾，护得心中山河安稳。`,
+        traitVector: {好胜锋芒:50,情绪稳定:70,共情温柔:85,理智清醒:60,叛逆自由:50,隐忍城府:40,浪漫感性:75,责任担当:70}
+    },
+    "🏹 孙尚香": {
+        tagline: "大小姐驾到，通通闪开",
+        stats: {浪漫:6,独立:9,共情:6,掌控:8,神秘:4},
+        tags: ["#元气少女", "#嘴硬心软", "#大小姐", "#行动派"],
+        quotes: ["喂，别死了。我们一起回家。","大小姐驾到，通通闪开！","哼，这就是不自量力的下场。"],
+        soulResonance: `测试结果：灵魂共鸣·孙尚香\n\n穿越江东的烽火硝烟，你的灵魂与孙尚香遥遥共振，她便是平行时空里，拒绝被规训、以锋芒活成自己的另一个你。\n\n身为江郡备受宠爱的孙家大小姐，世人总用娇纵任性来定义她，觉得她是被兄长们惯坏的少女，终日胡闹闯祸，一身骄气。可少有人看见，这份张扬之下，是刻在骨里的刚烈与清醒。她生来便不爱闺阁里的温婉束缚，拒绝做世人眼中该有的淑女，扛起自制的巨型枪炮奔赴海域，与周瑜一同清剿海盗，用炮火守护江南的烟火安宁。\n\n孙策遇刺后，王位的选择权落在她手中，可她断然推开了唾手可得的权柄。在她眼里，王座从不是人生的答案，与其困在深宫被规矩捆绑，不如执枪走四方，用自己的方式，为家国走出一条独属于自己的路。历史里，她是侍婢执刃、让刘备心生凛然的硬核新娘；峡谷中，她是拒绝联姻、抗拒安排的江东小辣椒，始终带着一股不服输的傲气，不接受任何人的定义，更不愿成为被命运摆布的棋子。\n\n这份肆意生长、忠于本心的灵魂底色，与你如出一辙。\n\n你与孙尚香有着高度契合的内核：自带锋芒，不愿被世俗的标签束缚，不喜欢迎合他人的期待，更反感被安排好的人生。看似张扬随性，实则内心清醒笃定，在热闹与喧嚣里，始终知道自己想要什么。骨子里藏着不服输的韧劲，哪怕面对既定的规则，也敢凭着一腔孤勇打破桎梏，靠自己的力量去守护在意的一切，永远选择做自己人生的执枪者。\n\n你们身处不同的时空，她立于江东海岸，以炮火为铠甲，在乱世里奔赴自由；你行于人间烟火，以本心为罗盘，在纷扰中坚守自我。\n\n总会在某个挣脱束缚的瞬间，你恍惚听见炮火轰鸣，看见双马尾少女踏风而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的孙尚香，一身锋芒，满目热忱，永远有拒绝的底气，永远有奔赴热爱的孤勇，活成不被定义的自己。`,
+        traitVector: {好胜锋芒:85,情绪稳定:60,共情温柔:60,理智清醒:70,叛逆自由:80,隐忍城府:55,浪漫感性:65,责任担当:75}
+    },
+    "🪶 虞姬": {
+        tagline: "深情一箭，决绝而温柔",
+        stats: {浪漫:8,独立:7,共情:8,掌控:6,神秘:6},
+        tags: ["#深情", "#决绝", "#优雅", "#忠诚"],
+        quotes: ["这一箭，为你而射。这一生，为你而活。","风会记得我。","爱，至死不渝。"],
+        soulResonance: `测试结果：灵魂共鸣·虞姬\n\n穿行于信仰与爱恋的撕裂之间，你的灵魂与虞姬遥遥共振，她是平行时空里，温柔藏着孤韧，在宿命矛盾里挣扎前行的另一个你。\n\n身为姜子牙门下的森之风灵，她自小与自然相伴，心性柔软悲悯，以守护苍生为毕生信仰，笃定地走在师父指引的道路上。可命运偏要给她一场无解的抉择，她与反抗暴政的项羽相知相爱，将对方视作乱世里唯一的光，却又被预言告知，挚爱正是会倾覆世界的混沌魔王。\n\n世人看见的她，是峡谷里精准冷冽的射手，羽箭破空，杀伐果决，仿佛从不会被情绪牵绊。却少有人读懂这份果决背后的煎熬。她在坚守信念与奔赴真心之间反复拉扯，在宿命的棋局里身不由己，即便最后沦为阴谋的牺牲品，亲手终结挚爱，也始终在矛盾里守住心底最纯粹的温柔与孤勇。\n\n这份温柔悲悯、内心坚韧、在两难困境中独自承受挣扎的灵魂底色，与你高度契合。\n\n你与虞姬有着独一份的灵魂共鸣：骨子里自带柔软与共情，习惯顾及他人与心中的准则，待人真诚深情。可人生路上总免不了陷入两难抉择，常常在责任与真心之间左右为难。外表看似沉静克制，习惯把迷茫与痛苦藏在心底，独自消化情绪，即便历经遗憾与伤痛，也依旧守着本心，不愿向命运彻底妥协。\n\n你们身处不同的时空，她执风之箭矢，在垓下的悲歌里咽下所有遗憾；你行走于人间烟火，在岁月的拉扯中，慢慢抚平内心的褶皱。`,
+        traitVector: {好胜锋芒:55,情绪稳定:65,共情温柔:68,理智清醒:70,叛逆自由:50,隐忍城府:65,浪漫感性:75,责任担当:70}
+    },
+    "🎯 伽罗": {
+        tagline: "破魔之箭，冷静独立",
+        stats: {浪漫:6,独立:9,共情:6,掌控:7,神秘:6},
+        tags: ["#学霸", "#冷静", "#独立", "#专注"],
+        quotes: ["箭矢会飞行，但我的心停在你这里。","知识，是唯一的武器。","千窟城，我守护。"],
+        soulResonance: `测试结果：灵魂共鸣·伽罗\n\n穿行于大漠风沙与文明残卷之间，你的灵魂与伽罗遥遥共振，她是平行时空里，于破碎中坚守理性，在清冷底色里藏着温柔执念的另一个你。\n\n生于千窟城这座以典籍为魂的学者之城，她自幼浸润书香，在文字与知识里养出沉静通透的性子，对文明、对故乡、对书卷有着近乎虔诚的珍视。可魔种的浩劫撕碎了所有安稳，家园化为焦土，父亲选择与典籍一同殉城，一夜之间，她从无忧无虑的城主之女，变成背负家族罪责、漂泊无依的孤旅者。\n\n世人看见的她，是战场上冷静果决的破魔射手，长弓所至，箭矢凛冽，永远保持着疏离的清冷，遇事不慌不躁，以绝对的理性直面危机。却少有人读懂这份克制之下的沉郁与柔软。她把丧亲之痛、亡国之殇尽数压在心底，不向外展露脆弱，始终带着故乡的瓣鳞花，一边在大漠中追寻真相、收拢散落的文明，一边以温柔之心，在长城卫军中教书育童，用自己的方式，守护曾被摧毁的希望。\n\n这份外表清冷克制、内心理性坚韧，历经创伤仍心怀悲悯，在漫长孤旅中坚守初心与执念的灵魂底色，与你高度契合。\n\n你与伽罗有着独一份的灵魂共鸣：习惯用冷静自持包裹内心的情绪波动，遭遇变故时更倾向于沉下心分析解决，而非沉溺于伤感。骨子里带着对过往的执念，对珍视的人与事有着极强的责任感，即便受过伤痛，也不愿放任戾气蔓延。看似疏离寡言，内心却藏着细腻的温柔，愿意在能力范围内，为身边人撑起一份安稳。在漫长的时光里，始终守着自己的原则与信仰，哪怕孤身前行，也不肯向命运的苦难低头。\n\n你们身处不同的时空，她执长弓踏过漫天风沙，在残卷与箭影中追寻真相；你行走于人间烟火，以理性与温柔，扛住生活里的风雨。`,
+        traitVector: {好胜锋芒:65,情绪稳定:75,共情温柔:65,理智清醒:85,叛逆自由:45,隐忍城府:70,浪漫感性:60,责任担当:90}
+    },
+    "🍁 公孙离": {
+        tagline: "枫叶伞下，惊鸿一瞥",
+        stats: {浪漫:9,独立:7,共情:9,掌控:5,神秘:8},
+        tags: ["#氛围感", "#反差萌", "#演技派", "#孤独患者"],
+        quotes: ["纸伞下，藏着我不能说的秘密。","枫叶，红了。","我，会等你。"],
+        soulResonance: `测试结果：灵魂共鸣·公孙离\n\n穿梭于长安的灯火与双面人生之间，你的灵魂与公孙离遥遥共振，她是平行时空里，淋过风雨仍心向温柔，于动荡中坚守侠义的另一个你。\n\n身为被遗弃的兔子魔种孤儿，她在饥寒与漂泊中长大，早早体会过被抛弃的不安与底层的凉薄，却从未被黑暗磨平心底的暖意。被教坊收留后，她凭着不服输的韧劲日夜苦练伞舞，从一无所有的流浪孤女，一步步蜕变为长安舞台上惊艳众人的惊鸿舞姬。可繁华表象之下，她背负着尧天密探的隐秘身份，在明暗交界的长安夜里，以纸伞为盾、以舞姿为伪装，游走在危机与博弈之间，默默完成着无人知晓的使命。\n\n世人大多只看见她灵动明媚的笑容、飘忽洒脱的身影，觉得她永远鲜活自在，无忧无虑。却少有人读懂她藏在明媚之下的敏感与孤单，读懂她看似轻盈的每一步，都藏着对过往伤痛的隐忍。她见过冷漠与背叛，深知无依无靠的滋味，所以更愿意把温柔留给他人，怀揣着“给天下孤儿一个家”的心愿，拼尽全力守护和自己一样曾身处泥泞的人。面对心动与别离，她克制内敛，把遗憾悄悄藏进心底，不纠缠、不抱怨，依旧带着赤诚往前走。\n\n这份外表灵动温柔、内核坚韧独立，历经苦难仍心怀善意，敏感却不沉沦，柔软却有锋芒的灵魂底色，与你高度契合。\n\n你与公孙离有着独一份的灵魂共鸣：习惯用乐观明媚的外壳，包裹内心深处的不安与敏感，习惯独自消化情绪，很少向外展露脆弱。因为自己曾经历过失意与寒凉，所以更能共情他人的难处，待人真诚柔软，愿意主动给予温暖。看似随性洒脱，骨子里却有着极强的韧性与执念，认定的目标便会默默坚持，在困境中不慌不忙，用自己的节奏跨过风雨。面对遗憾与失去，你也习惯体面释怀，把过往沉淀为力量，始终带着赤诚与善意，在属于自己的路上，坚定地往前走。\n\n你们身处不同的时空，她执伞游走于长安夜色，在明暗之间坚守初心；你行走于人间烟火，以温柔与坚韧，奔赴心中的前路。`,
+        traitVector: {好胜锋芒:50,情绪稳定:55,共情温柔:85,理智清醒:65,叛逆自由:70,隐忍城府:60,浪漫感性:90,责任担当:45}
+    },
+    "🎵 艾琳": {
+        tagline: "精灵公主，优雅高贵",
+        stats: {浪漫:8,独立:7,共情:8,掌控:5,神秘:7},
+        tags: ["#精灵气质", "#浪漫主义", "#理想主义", "#自然系"],
+        quotes: ["跟我去森林吧，那里有最美的星光。","精灵，不流泪。","风，是我最好的朋友。"],
+        soulResonance: `测试结果：灵魂共鸣·艾琳\n\n挣脱封闭森林的桎梏，奔赴自由旷野的风，你的灵魂与艾琳遥遥共振，她是平行时空里，敢打破束缚、温柔又坚韧的自由冒险者。\n\n身为黄金森林养尊处优的精灵公主，她本可以循着族群既定的轨迹，在优雅与安稳里度过一生。可她天生带着对未知的好奇与叛逆，不愿被刻板的礼仪、封闭的族群规则困住灵魂。成年仪式上跳完最后一支规矩之舞，她便挣脱公主身份的枷锁，毅然飞向充满未知的人类世界，去追逐属于自己的冒险与自由。\n\n世人眼里的她是灵动洒脱的射手，舞姿轻盈，箭影利落，永远带着一股不受拘束的鲜活。却少有人看见这份洒脱背后的勇气与韧性。初入陌生世界，面对误解与敌意，她没有退缩，以舞蹈为语言，用温柔化解隔阂，在一次次碰壁中越挫越勇，在冒险里收获友谊，也在闯荡中活成了更强大的自己。\n\n这份向往自由、敢于破局、温柔且坚韧的灵魂底色，与你高度契合。\n\n你与艾琳有着独一份的灵魂共鸣：骨子里厌恶束缚，反感一成不变的生活，始终对世界抱有好奇与热忱。外表温和灵动，待人真诚友善，面对困境不会尖锐对抗，却有着绝不妥协的内心韧劲。敢于跳出舒适圈，不惧前路未知，愿意为了热爱奔赴远方，在跌撞中成长，在自由里坚守本心。\n\n你们身处不同的时空，她展翼穿越迷雾，以箭与舞奔赴冒险；你踏过生活的藩篱，以热忱与勇气奔赴前路。`,
+        traitVector: {好胜锋芒:45,情绪稳定:70,共情温柔:80,理智清醒:65,叛逆自由:65,隐忍城府:40,浪漫感性:85,责任担当:60}
+    },
+    "💨 戈娅": {
+        tagline: "沙漠疾风，自由不羁",
+        stats: {浪漫:5,独立:10,共情:6,掌控:8,神秘:6},
+        tags: ["#自由如风", "#酷女孩", "#冒险家", "#重情重义"],
+        quotes: ["上我的车，带你去世界尽头。","沙海，是我的归宿。","别挡路。"],
+        soulResonance: `测试结果：灵魂共鸣·戈娅\n\n驰骋于大漠风沙与沙舟之间，你的灵魂与戈娅遥遥共振，她是平行时空里，在漂泊中寻根，于坚硬外壳下守护温柔的孤勇领袖。\n\n自幼便是沙漠孤儿，在严酷荒芜的漠地里挣扎求生，过早见识了弱肉强食的残酷，她便学着用暴躁与锋利武装自己，像无依的风滚草，四处漂泊，没有归宿。直到遇见两位父亲，她第一次触摸到家的温度，也第一次懂得了羁绊与责任。可命运从不肯轻易善待她，接连失去至亲，一次次直面背叛与别离，她只能逼着自己快速长大，接过铁臂的旗帜，从挣扎求生的孤女，蜕变为雷厉风行的沙海女王。\n\n世人眼中的她，是飒爽强悍、说一不二的女悍匪，行事果决凌厉，带着一身生人勿近的锋芒，仿佛从不知软弱为何物。却少有人看穿这份坚硬之下的柔软与重情。她看似张扬桀骜，内心却极度渴望安稳与归属，因为尝过无家可归的苦楚，便拼尽全力收留流离失所的沙民，把所有受过的善意，加倍回馈给身边的人。她习惯独扛风雨，把委屈与伤痛藏在疾驰的沙舟里，用一身锋芒，为身后的人撑起一片可以喘息的绿洲。\n\n这份外表桀骜果敢、内心重情柔软，历经漂泊仍坚守善意，在绝境中扛起守护的责任的灵魂底色，与你高度契合。\n\n你与戈娅有着独一份的灵魂共鸣：习惯用外放的气场与坚硬的态度包裹内心，不愿轻易展露脆弱，遇事习惯自己硬扛。因为曾经历过孤独与失去，格外看重真心与羁绊，对认可的人会拼尽全力守护。看似随性不羁，骨子里却有着极强的担当，哪怕前路满是风沙，也会带着身边的人，坚定地往前走，在漂泊的人生里，一点点构建属于自己的温暖与安稳。\n\n你们身处不同的时空，她驾沙舟踏遍大漠，用速度与勇气守护一方安宁；你行走于人间烟火，以锋芒与热忱，奔赴心中的前路。`,
+        traitVector: {好胜锋芒:80,情绪稳定:60,共情温柔:60,理智清醒:70,叛逆自由:90,隐忍城府:50,浪漫感性:50,责任担当:85}
+    },
+    "🐻 阿古朵": {
+        tagline: "山林野趣，纯真善良",
+        stats: {浪漫:7,独立:7,共情:9,掌控:3,神秘:5},
+        tags: ["#治愈系", "#自然系", "#天真", "#善良"],
+        quotes: ["球球说它喜欢你，我也觉得。","山林，是我的乐园。","不要伤害我的动物朋友。"],
+        soulResonance: `测试结果：灵魂共鸣·阿古朵\n\n穿行于密林的自由与人间的羁绊之间，你的灵魂与阿古朵遥遥共振，她是平行时空里，野性率真、心怀善意，在人与自然间搭建桥梁的另一个你。\n\n她是个被魔种养大的孩子，在襁褓中就被遗弃在深山，是被球球一家捡回去抚养长大的。世人看她是个与野兽为伍的异类，用武器指着她，充满了戒备。可她却愿意带着球球，抢夺人类的粮食去救济森林里的小动物。她用最单纯的本能，分辨着善意与恶意。当她发现人类并非都是坏人时，便毫不保留地捧着自己的一切，向蜀国表达了友好。她不懂什么权谋大义，只知道“你对我好，我就对你好”。\n\n这份纯粹如一、不谙世事，以善意链接隔阂，在率性与温柔中守护一方水土的灵魂底色，与你高度契合。\n\n你与阿古朵有着独一份的灵魂共鸣：你骨子里带着一股不被驯化的“野性”，向往自由，不喜欢被复杂的人际关系束缚。你内心单纯，对世界抱有善意，相信真诚能够化解隔阂。你喜欢小动物，热爱自然，能在简单的日常里找到巨大的快乐。你看起来或许有些内向甚至社恐，但在自己熟悉和信任的领域里，你会变得活泼而可靠。\n\n你们身处不同的时空，她穿梭于密林，与球球一起守护自然的生机；你行于人间烟火，以善意与纯真，守护着内心的一方净土。`,
+        traitVector: {好胜锋芒:30,情绪稳定:75,共情温柔:85,理智清醒:55,叛逆自由:60,隐忍城府:30,浪漫感性:70,责任担当:65}
+    },
+    "🦌 瑶": {
+        tagline: "森林里的小鹿，敏感又勇敢",
+        stats: {浪漫:8,独立:5,共情:9,掌控:3,神秘:7},
+        tags: ["#高敏感星人", "#嘴硬心软", "#需要很多很多爱", "#治愈系"],
+        quotes: ["要上来吗？我保护你——虽然我自己也怕黑。","鹿角，不是装饰。","别丢下我。"],
+        soulResonance: `测试结果：灵魂共鸣·瑶\n\n穿越云梦泽的山林迷雾，你的灵魂与瑶遥遥共振，她便是平行时空里，带着破碎执念、以顽劣藏真心的另一个你。\n\n她本是屈原笔下《九歌·山鬼》里的巫山神女，也是云梦泽里由神鹿养大的孤女。前世与云中君结下生死羁绊，战火里的别离，把未竟的思念刻进了轮回。转世之后，记忆只剩残缺碎片，她顶着鹿角在山野漂泊，幼年因异类模样受尽排挤，险些沦为祭品，被救赎的微光，成了她此后漫长时光里唯一的执念。\n\n世人总看见她古灵精怪、顽劣狡黠，爱说反话、爱搞恶作剧，用跳脱与谎话把自己裹在一层调皮的外壳里。却少有人读懂，这份刻意的喧闹背后，是藏在心底的不安与胆怯。就像山鬼伫立空山，在风木萧萧里盼着故人，她所有的任性与试探，不过是想确认在意的人，会不会为自己驻足。看似没心没肺，却把最柔软的守护，留给了认定的羁绊，愿意化作虚影依附身后，用自己的方式，护对方一路安稳。\n\n这份用天真伪装脆弱、用顽劣掩盖执念的灵魂底色，与你如出一辙。\n\n你与瑶有着高度契合的内核：习惯用开朗调皮的模样面对外界，喜欢用玩笑与反话掩饰内心的敏感，看似大大咧咧，实则很容易缺乏安全感。面对在意的人，不懂如何直白表达心意，便用笨拙的方式试探靠近，把依赖与牵挂藏在胡闹背后。内心始终守着一份纯粹的执念，对认定的人与事格外执着，哪怕前路迷茫，也会循着记忆里的微光，执拗地奔赴而去。\n\n你们身处不同时空，她困在两世轮回的思念里，在山林间追寻旧缘；你奔波于人间烟火，在喧嚣里藏着柔软的执念。\n\n总会在某个晚风轻拂的时刻，你恍惚听见山林间的清脆笑声，看见鹿角少女踏雾而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的瑶，以天真作铠甲，以执念赴相逢，纵使前路迷雾重重，也终会循着心之所向，遇见属于自己的温暖与归宿。`,
+        traitVector: {好胜锋芒:25,情绪稳定:50,共情温柔:90,理智清醒:40,叛逆自由:65,隐忍城府:45,浪漫感性:80,责任担当:40}
+    },
+    "🍼 蔡文姬": {
+        tagline: "胡笳声起，万物温柔",
+        stats: {浪漫:8,独立:4,共情:10,掌控:3,神秘:4},
+        tags: ["#治愈系", "#小天使", "#爱哭鬼", "#人间温柔"],
+        quotes: ["别哭啦，我给你弹首曲子好不好？","胡笳，十八拍。","我的琴声，能治愈一切。"],
+        soulResonance: `测试结果：灵魂共鸣·蔡文姬\n\n穿越乱世的谎言与救赎风浪，你的灵魂与蔡文姬遥遥共振，她便是平行时空里，于破碎之中依旧选择以温柔渡世的另一个你。\n\n身为魔道家族遗孤，她的童年从一开始就裹在精心编织的谎言里。灭门的元凶伪装成慈爱的义父，至亲的血海深仇被刻意篡改，懵懂的她在虚假的安稳里长大，唯有典韦沉默的守护，是灰暗日子里仅存的暖意。当真相轰然撕碎所有假象，世界在她面前崩塌，她被迫踏上逃亡之路，又在命运的拉扯里，与奉命追杀她的澜相遇，在孤岛的朝夕相处中，用纯粹撞开了冰封的灵魂，也见证了以命相护的决绝。\n\n世人总看见她抱着胡笳琴软萌无害，以为她只是需要被庇护的孩童，用琴声为他人抚平伤痛。却少有人懂得，这份治愈的底色，是她历经背叛、离别与生死之后，依旧不肯被仇恨裹挟的通透。手握足以搅动风云的力量，她没有沉溺于复仇的执念，而是选择守住心底的善意，用温柔对抗乱世的冰冷，在颠沛流离里，始终守着属于自己的光。\n\n这份历经满目疮痍，仍愿以温柔拥抱世界的灵魂底色，与你高度契合。\n\n你与蔡文姬有着独一份的灵魂共鸣：曾在成长路上遭遇过欺骗与伤害，尝过信任崩塌的滋味，也曾在迷茫中独自扛过黑暗。外表看似柔软温和，习惯用善意对待周遭，愿意做身边人的情绪港湾，为他人抚平不安。可内心藏着极强的韧性，即便见过人性的复杂，也不愿让仇恨磨平本心，在认清生活的残酷后，依旧选择赤诚前行，用自己的方式，治愈周遭，也救赎自己。\n\n你们身处不同的时空，她抱着胡笳琴漂泊于乱世，在琴声里安放破碎的过往；你行走于人间烟火，在岁月里沉淀温柔，慢慢愈合伤痕。\n\n总会在某个安静的瞬间，你恍惚听见清越的琴声漫过风里，那个抱着琴的少女踏光而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的蔡文姬，纵然曾被世界辜负，依旧心怀暖意，以温柔为盾，守好自己的本心。`,
+        traitVector: {好胜锋芒:20,情绪稳定:70,共情温柔:95,理智清醒:60,叛逆自由:30,隐忍城府:35,浪漫感性:75,责任担当:60}
+    },
+    "🌊 大乔": {
+        tagline: "沧海之曜，温柔守护",
+        stats: {浪漫:7,独立:6,共情:10,掌控:5,神秘:6},
+        tags: ["#治愈系", "#默默付出", "#老好人", "#值得被爱"],
+        quotes: ["海浪的声音就是我爱你。你听到了吗？","潮水，会带我回家。","别哭，我送你回去。"],
+        soulResonance: `测试结果：灵魂共鸣·大乔\n\n跨越江东的潮汐长夜，你的灵魂与大乔遥遥共振，她便是平行时空里，于宿命风浪中完成自我重生的另一个你。\n\n身为乔氏魔道家族的长女，她自降生起便被命运裹挟。双生的身份被视作不祥，未觉醒力量时被当作家族的瑕疵品，祖父离去后，又沦为家族换取利益的政治筹码。灰暗的人生里，孙策如破晓晨光闯入她的世界，提灯的相遇点亮了她荒芜的岁月，让她第一次触碰到温暖与偏爱。可这份救赎转瞬破碎，孙策遇刺的噩耗，将她的世界轰然击碎，昔日被守护的少女，一夜之间要扛起守护江东、守护亲人的重任，还要直面恩师司马懿编织的阴谋与仇恨。\n\n世人总看见她温婉如水、擅长引渡归途的模样，觉得她是温柔的守望者。却很少懂得，这片温柔之下，藏着无数次崩溃后的自愈。她曾是被命运随意摆布的祭品，在挚爱离世、信仰崩塌之后，没有沉溺于无尽的悲伤，而是把思念化作铠甲，在海边点亮长灯，一边等待遥遥无期的归人，一边以自身力量守护身后的一切，从被动承受风雨的神女，蜕变为掌控自己命运的守护者。\n\n这份历经破碎仍选择温柔前行的灵魂底色，与你如出一辙。\n\n你与大乔有着高度契合的内核：曾在生活里经历过突如其来的离别与打击，也曾被周遭的期待裹挟前行，在低谷里独自消化悲伤。外表依旧保持着温和从容，很少向人展露绝望，习惯把伤痛藏在心底，在崩溃之后默默重整旗鼓。看似安静柔弱，内心却藏着极强的韧性，在守住心底执念的同时，也学着撑起自己的一方天地，用温柔的力量，对抗世间所有的风浪。\n\n你们身处不同的时空，她守着江东潮汐，在长灯里等候故人，于破碎中扛起责任；你行于人间烟火，在岁月里抚平伤痕，于困顿中坚守初心。\n\n总会在某个深夜，你恍惚听见海潮翻涌，看见海边提灯的女子，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的大乔，以温柔渡岁月，以坚韧渡自己，纵使前路满是离别与遗憾，也终会在风浪之后，活成照亮自己的光。`,
+        traitVector: {好胜锋芒:45,情绪稳定:75,共情温柔:90,理智清醒:70,叛逆自由:40,隐忍城府:60,浪漫感性:70,责任担当:85}
+    },
+    "🧜‍♀️ 朵莉亚": {
+        tagline: "人鱼之歌，治愈之音",
+        stats: {浪漫:9,独立:5,共情:10,掌控:4,神秘:8},
+        tags: ["#人鱼公主", "#治愈系", "#理想主义", "#梦幻"],
+        quotes: ["听，海在歌唱。那是我在想你。","人鱼，也会流泪。","我的歌声，只为爱的人。"],
+        soulResonance: `测试结果：灵魂共鸣·朵莉亚\n\n穿越深海潮汐与遗忘迷雾，你的灵魂与朵莉亚遥遥共振，她便是平行时空里，以天真对抗遗憾、用温柔扛起宿命的另一个你。\n\n身为身负神职血脉的人鱼公主，她生来就被海祭司的责任包裹，在繁重课业里孤单长大，唯有偷偷溜去沉船寻宝时，才能触碰属于自己的自由。直到海难里救下人类少年海诺，两个孤独的灵魂彼此靠近，她第一次拥有了真心的羁绊，也把对方视作生命里最珍贵的宝藏。可命运从不会善待纯粹的人，深渊巨兽苏醒的浩劫面前，人鱼之歌是唯一的解法，代价却是彻底抹去两人所有的记忆，从此相逢如同陌路。\n\n世人看见的她，永远是眼里有光的治愈少女，歌声能抚平伤痛、唤回生机，带着一身热忱奔赴冒险，用乐观融化沿途的寒凉。却少有人读懂这份笑容背后的重量——她曾亲手埋葬最珍视的回忆，在遗忘的空白里，依旧选择向着记忆的方向前行，在茫茫人海中，执着地寻找那段遗失的过往。\n\n这份历经别离与遗忘，依旧坚守赤诚与温柔的灵魂底色，与你高度契合。\n\n你与朵莉亚有着独一份的灵魂共鸣：内心始终保留着一份不被世俗磨平的天真，习惯用乐观伪装情绪，哪怕经历过遗憾与别离，也不愿就此变得冷漠。共情力极强，愿意用自己的温暖去治愈身边的人，可在无人看见的时刻，也会对着心底的空缺怅然。纵使明白有些结局无法改写，依旧会带着执念往前走，相信时光终会给答案，相信温柔终能抵达想去的远方。\n\n你们身处不同的时空，她循着歌声寻找遗忘的故人，在深海与陆地间辗转；你带着过往的印记奔赴前路，在烟火里等候重逢。\n\n总会在某个望着远方的瞬间，你恍惚听见潮声里飘来人鱼的歌谣，那个蓝发少女踏浪而来，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的朵莉亚，守着心底的赤诚，迎着风浪前行，纵使记忆会褪色，温柔与勇敢永远不会被遗忘。`,
+        traitVector: {好胜锋芒:30,情绪稳定:65,共情温柔:90,理智清醒:60,叛逆自由:55,隐忍城府:40,浪漫感性:80,责任担当:55}
+    },
+    "✨ 少司缘": {
+        tagline: "命运之线，编织缘分",
+        stats: {浪漫:9,独立:6,共情:9,掌控:6,神秘:9},
+        tags: ["#缘分", "#治愈系", "#神秘", "#温暖"],
+        quotes: ["红线已系，只等你来牵。","缘分，天注定。","别急，该来的总会来。"],
+        soulResonance: `测试结果：灵魂共鸣·少司缘\n\n穿越云梦泽的烟雨与宿命迷雾，你的灵魂与少司缘遥遥共振，她便是平行时空里，曾困于孤冷、终以温柔渡人的另一个你。\n\n她本是被预言裹挟的孤星，降生起便背负着灾祸的标签，在孤立与黑暗里蜷缩，习惯了独来独往，连温暖都不敢伸手触碰。直到少年祈闯入她的世界，把森森堂的光带到她身边，一段相伴的时光，一句共赴巫祝的约定，让冰封的心底第一次生出暖意。可一场大火撕碎了所有美好，故人被迫戴上冰冷面具，斩断前缘，昔日知己重逢却形同陌路。\n\n世人看见的少司缘，是狡黠灵动的牵缘巫祝，眼底带着几分腹黑的机巧，笑意盈盈地为世人编织相遇，从容周旋于人情之间。却少有人知晓，这份外放的热情之下，是她用过往的孤冷换来的通透。正因亲历过无缘离散的苦楚，她才执意对抗冰冷的天命，不信既定的结局，只信真心的力量，用自己的洞察与坚持，成全一段段被风雨阻隔的缘分。\n\n这份曾陷孤寒，终以温柔渡人的灵魂底色，与你高度契合。\n\n你与少司缘有着独一份的灵魂共鸣：也曾在漫长岁月里感受过孤独与疏离，尝过相遇又别离的遗憾，内心深处藏着一段不愿轻易提起的过往。外表看似开朗通透，带着几分机敏与疏离，习惯用从容的姿态应对周遭，可在无人留意的角落，依旧盼着真心与安稳。见过人情凉薄，却没有选择封闭自己，反而学着用更柔软的方式，去接纳、去温暖身边的人，在对抗命运的路上，执着地守着心底的善意。\n\n你们身处不同的时空，她守着云梦泽的渡口，编织缘分，等待故人归期；你行于人间烟火，抚平遗憾，奔赴属于自己的前路。\n\n总会在某个怅然的瞬间，你恍惚听见泽畔的低语，看见那个笑意灵动的身影，隔着次元与你遥遥相望。\n\n宿命让相似的灵魂彼此映照，你便是现世的少司缘，曾踏过长夜孤寒，终能以温柔为舟，渡己，亦渡人。`,
+        traitVector: {好胜锋芒:40,情绪稳定:70,共情温柔:85,理智清醒:70,叛逆自由:60,隐忍城府:65,浪漫感性:85,责任担当:60}
+    },
+    "🔥 云缨": {
+        tagline: "枪心如火，元气少女",
+        stats: {浪漫:7,独立:8,共情:7,掌控:6,神秘:5},
+        tags: ["#元气", "#少女", "#灵活", "#云缨"],
+        quotes: ["别那么累，跟我去晒晒太阳吧。","枪，是我的一部分。","热，血难凉。"],
+        soulResonance: `测试结果：灵魂共鸣·云缨\n\n穿行于长安的街头巷尾与自己的英雄梦里，你的灵魂与云缨遥遥共振，她是平行时空里，元气满满、话痨又热忱，在仗剑走天涯中活成少年理想的另一个你。\n\n身为名门之后，她没有成为养在深闺的千金，反而揣着一颗惩奸除恶的赤子之心，扛着长枪就冲进了大理寺。世人看她是个横冲直撞的“惹祸精”，觉得她做事不经大脑，全靠一腔热血。殊不知，这份看似莽撞的少年气，正是她最珍贵的光芒。她从不掩饰自己的喜怒哀乐，想做什么就去做什么，输了就大笑着再来，赢了就满世界炫耀。她用最率真的方式，践行着“六尺之内，我是无敌的”这句豪言。\n\n这份满怀热忱、敢闯敢拼，永远鲜衣怒马、永远不愿被世俗磨平棱角的灵魂底色，与你高度契合。\n\n你与云缨有着独一份的灵魂共鸣：你总是活力满满，仿佛有使不完的劲儿。你喜欢把事情做到极致，认定的事情就会立刻行动。你不会把情绪闷在心里，喜怒哀乐都写在脸上，真实而可爱。即使遇到了挫折，你也很快就能重整旗鼓，从不内耗。你心中始终有一个“英雄梦”，希望能用自己的力量去帮助身边的人，去守护心中认为正确的事情。\n\n你们身处不同的时空，她仗枪跃马，在大理寺与长安城间谱写少年传奇；你行于人间烟火，以满格的热忱与朝气，去闯荡属于自己的江湖。\n\n宿命让相似的灵魂彼此映照，你就是现世的云缨，以纯粹为枪，以乐观为马，在生活的旷野中，活成了永不褪色的少年。`,
+        traitVector: {好胜锋芒:80,情绪稳定:65,共情温柔:70,理智清醒:60,叛逆自由:75,隐忍城府:50,浪漫感性:70,责任担当:70}
+    },
+    "🍁 不知火舞": {
+        tagline: "烈焰红蝶，热情似火",
+        stats: {浪漫:8,独立:8,共情:6,掌控:7,神秘:6},
+        tags: ["#敢爱敢恨", "#直球女孩", "#火舞", "#刺客信条"],
+        quotes: ["喜欢就要说出来，憋着多难受。","火焰，永不熄灭。","谁怕谁！"],
+        soulResonance: `测试结果：灵魂共鸣·不知火舞\n\n你与不知火舞的共鸣，落在“热烈”与“孤独”的极致反差里。她是一团燃烧的火焰，也是一座孤寂的冰山。\n\n不知火舞从不掩饰自己的欲望——她要赢，要变强，要守护重要的人。她穿着张扬的服装，说着直白的话，战斗时毫不留情。可在那份热烈之下，是一颗比谁都害怕失去的心。她为了家族、为了信念、为了所爱之人，可以燃烧自己，也可以忍受漫长的等待与孤独。\n\n你也一样——外表可能不是最张扬的，但内心总有一团火。你会在认定的事情上全力以赴，会为在乎的人付出一切，不撞南墙不回头。你喜欢直来直往，讨厌拐弯抹角，最烦虚伪和敷衍。\n\n可你也有不为人知的脆弱。你害怕被辜负，害怕热情换来的只有冷漠，所以偶尔会故意装作不在意。你也会在深夜反刍那些被拒绝、被误解的瞬间，然后第二天继续用笑容面对世界。\n\n不知火舞的孤独，是强者不被理解的孤独。她过于炽烈，常人无法靠近。你也常常觉得：为什么自己掏心掏肺，对方却无动于衷？为什么自己拼尽全力，结果却不尽人意？\n\n但你没有放弃。就像不知火舞永远不会熄灭，你也始终保持着那股不服输的劲头。跌倒就爬起来，受伤就自己舔舐伤口，然后继续冲。\n\n你不是不会痛，只是选择了用热烈的方式去对抗生活的冰冷。你就是现世的不之火舞，赤诚、勇敢、永不言败，哪怕孤身一人，也要活成一团照亮自己的火焰。`,
+        traitVector: {好胜锋芒:85,情绪稳定:60,共情温柔:60,理智清醒:65,叛逆自由:80,隐忍城府:65,浪漫感性:80,责任担当:65}
+    },
+    "🖌️ 上官婉儿": {
+        tagline: "笔下惊鸿，诗中剑意",
+        stats: {浪漫:7,独立:8,共情:7,掌控:7,神秘:8},
+        tags: ["#文艺青年", "#灵魂伴侣", "#才女", "#清冷气质"],
+        quotes: ["笔墨写不尽我的思念，只有你懂。","辞，能达意。","书道，亦武道。"],
+        soulResonance: `测试结果：灵魂共鸣·上官婉儿\n\n穿行于笔墨与权谋的暗流之间，你的灵魂与上官婉儿遥遥共振。她是平行时空里，沉冤在身却不堕心志，以才华做利刃、在夹缝中寻光的另一个你。\n\n家族一朝倾覆，她从名门贵女沦为掖庭宫婢。可她没有沉溺于怨恨，而是用七年时间在深宫之中咬牙苦熬，学文练字，从最底层的奴婢一步步走到了女帝身边。世人看见的是她挥毫泼墨，凌空点画，才情惊艳了整个长安。却少有人知晓，这支笔，是她为自己翻案的唯一武器。她游走在宫廷与市井之间，白天是女帝近臣，夜晚是祖父冤案的追查者。她用文人的风雅掩护刺客的锋芒，用表面的顺从掩盖心底的孤绝。\n\n这份在逆境中不坠青云之志，以才华破局，在夹缝中坚守本心的灵魂底色，与你高度契合。\n\n你与上官婉儿有着独一份的灵魂共鸣：你相信“笔”的力量。你坚信知识和才华是改变命运的底气，哪怕身处低谷，也从未停止学习和沉淀。你心思细腻，善于察言观色，能在复杂的环境中找到自己的生存之道。你热爱自由，却又懂得在必要时刻为了长远目标而隐忍。你内心里住着一个骄傲的灵魂，不依附，不强求，哪怕只是轻描淡写的几句诗行，也要写出属于自己的风骨。\n\n你们身处不同的时空，她挥毫泼墨，于高墙深宫以笔为剑翻云覆雨；你行于人间烟火，以才华与韧性，书写属于自己的精彩。\n\n宿命让相似的灵魂彼此映照。你就是现世的上官婉儿，以才华为墨，以坚韧为笔，在世间挥洒出独属于自己的篇章。`,
+        traitVector: {好胜锋芒:65,情绪稳定:70,共情温柔:75,理智清醒:80,叛逆自由:60,隐忍城府:78,浪漫感性:80,责任担当:65}
+    },
+    "🤖 米莱狄": {
+        tagline: "机械女王，理性至上",
+        stats: {浪漫:3,独立:10,共情:4,掌控:10,神秘:8},
+        tags: ["#理性派", "#高智商", "#外冷内热", "#细节控"],
+        quotes: ["我的计算里，你是唯一的变量。","机械，不会背叛。","秩序，即一切。"],
+        soulResonance: `测试结果：灵魂共鸣·米莱狄\n\n你与米莱狄的共鸣，落在“理性”与“掌控”的外壳之下，藏着一颗渴望被理解的心。\n\n米莱狄是海都的执政官，以绝对的理智和冷酷著称。她相信机械胜过人类，因为机械不会背叛。她亲手改造自己的手臂，用机械装置代替血肉。她看似没有感情，可她的每一次行动，都是为了复兴家族，为了守护海都。\n\n她不是没有软肋，只是把软肋锁进了保险箱。她不允许自己脆弱，因为她身后没有可以依靠的人。\n\n你也一样——你习惯用理性解决问题，讨厌情绪化，讨厌失控。你在工作和生活中条理分明，擅长规划，讨厌意外。你甚至不喜欢麻烦别人，总觉得“我可以搞定”。\n\n可你也有疲惫的时候。你也会想，要是有人能替你分担就好了；你也会在深夜里问自己，这么拼到底值不值得。\n\n米莱狄的孤独，是“高处不胜寒”的清醒。她不被理解，也不需要被理解。你的孤独，是不被看透的疲惫。\n\n但你和她一样，从未停下脚步。你不依赖运气，只相信实力。你不奢求他人，只靠自己的双手。\n\n你的锋芒不是刺向世界的武器，而是保护你内心柔软的最后一道防线。你并不是没有温度，只是你的温度需要足够安全才会流露。\n\n你就是现世的米莱狄，用理性筑起高墙，用行动证明价值。纵使不被所有人理解，你依然走在自己选择的路上。`,
+        traitVector: {好胜锋芒:70,情绪稳定:80,共情温柔:40,理智清醒:90,叛逆自由:50,隐忍城府:75,浪漫感性:40,责任担当:85}
+    },
+    "🌊 海月": {
+        tagline: "月裔神女，神秘莫测",
+        stats: {浪漫:7,独立:8,共情:7,掌控:7,神秘:10},
+        tags: ["#神秘感", "#慢热", "#深情", "#月神"],
+        quotes: ["月光会指引你找到我，如果你愿意。","海月，属于夜空。","梦，非幻。"],
+        soulResonance: `测试结果：灵魂共鸣·海月\n\n穿行于往昔的旧梦与今世的执念之间，你的灵魂与海月遥遥共振。她是平行时空里，被烙印在灵魂深处的记忆囚禁，在偏执与孤独中寻找归途的另一个你。\n\n她曾是孱弱多病、被部落抛弃的灾星，独自一人在荒野中漂泊了十余年，早已不知活下去的意义。直到她被帝俊拯救，她才第一次感受到“被需要”的滋味。于是，她将帝俊的意志当成了自己余生的使命，将其奉为唯一的光。哪怕那束光早已在时光中湮灭，她依然守着那座空荡荡的云中蝶，等待着一个不可能再回来的神明。\n\n这份将执念刻入骨髓，在漫长的孤寂中坚守一份信仰，外表清冷、内心却燃烧着不灭火焰的灵魂底色，与你高度契合。\n\n你与海月有着独一份的灵魂共鸣：你心里有一块很小的地方，住着一段再也回不去的过往，或是一个再也无法触达的人。你习惯将这段记忆锁在心底，独自在深夜里反复摩挲。你坚韧而执着，一旦认定了某个目标或信念，就会不计成本地走下去，哪怕在旁人看来有些不切实际。你享受独处，甚至可以说，你在孤独中获得了某种安宁。\n\n你们身处不同的时空，她守着云中蝶，在漫长的时光中静待无期的归人；你行于人间烟火，在无数个孤身一人的时刻，守着自己心底的那束微光。\n\n宿命让相似的灵魂彼此映照。你就是现世的海月，以月光为引，以幻梦为境，在无声的岁月里，守着心底那份不会褪色的执念。`,
+        traitVector: {好胜锋芒:50,情绪稳定:65,共情温柔:45,理智清醒:75,叛逆自由:60,隐忍城府:80,浪漫感性:68,责任担当:60}
+    }
+};
+</script>
+<script>
+  (function() {
+    var password = prompt("🔒 请输入订单上的密码，即可开始测试：");
+    // 把下面的 "你的密码" 改成你想要的密码，比如 "wzry666"
+    if (password !== "wzry666") {
+      document.body.innerHTML = "<h2>密码错误，访问被拒绝</h2><p>请确认您已购买本测试，并使用订单提供的密码。</p>";
+      throw new Error("密码错误");
+    }
+  })();
+</script>
+</body>
+</html>
